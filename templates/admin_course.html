@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Courses</h1>
+    <a class="btn btn-primary" href="{{ url_for('admin_courses_new') }}">+ New Course</a>
+  </div>
+
+  {% if courses %}
+    <div class="card shadow-sm">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Title</th>
+              <th>Status</th>
+              <th>Price</th>
+              <th style="width: 1%;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in courses %}
+              <tr>
+                <td>
+                  <div class="fw-medium">{{ c.title }}</div>
+                  <div class="small text-muted">{{ c.short_desc }}</div>
+                </td>
+                <td>
+                  {% if c.published %}
+                    <span class="badge text-bg-success">Published</span>
+                  {% else %}
+                    <span class="badge text-bg-secondary">Draft</span>
+                  {% endif %}
+                </td>
+                <td>₹{{ c.price }}</td>
+                <td><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin_course_detail', course_id=c.id) }}">View</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-info">No courses yet.</div>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,221 @@
+#!/usr/bin/env bash
+# portalctl — unified control for the E‑Learning portal (gunicorn + cloudflared)
+# - Interactive menu with numbered choices (no args)
+# - Automatic log rotation with small backups on status/start/restart/shutdown/reboot
+
+set -euo pipefail
+
+PRJ="$HOME/e_learning_portal"
+BIND_IP="192.168.1.216"
+PORT="8000"
+PORT_DEV="5000"
+CLOUDFLARE_CFG="$HOME/.cloudflared/config.yml"
+TUNNEL_NAME="elearning-pi"
+
+# colors
+Y="\033[33m"; G="\033[32m"; R="\033[31m"; B="\033[34m"; N="\033[0m"
+
+log(){ printf "[%s] %s\n" "$(date +'%F %T')" "$*"; }
+
+need_proj(){ [[ -d "$PRJ" ]] || { echo "Project dir not found: $PRJ" >&2; exit 1; } }
+
+hard_kill(){
+  local patt="$1"
+  if pgrep -fa "$patt" >/dev/null 2>&1; then
+    log "TERM: $patt"
+    pkill -TERM -f "$patt" || true
+    for _ in {1..5}; do sleep 1; pgrep -fa "$patt" >/dev/null || break; done
+    if pgrep -fa "$patt" >/dev/null 2>&1; then
+      log "KILL: $patt"
+      pkill -KILL -f "$patt" || true
+    fi
+  fi
+}
+
+free_port(){
+  local port="$1"
+  if ss -ltnp | grep -q ":$port"; then
+    log "Freeing TCP port $port"
+    sudo fuser -k "${port}"/tcp || true
+  fi
+}
+
+health_wait(){
+  for _ in {1..15}; do
+    if curl -fsS "http://${BIND_IP}:${PORT}/healthz" >/dev/null 2>&1; then
+      log "App is healthy."
+      return 0
+    fi
+    sleep 1
+  done
+  log "Warning: /healthz did not return 200 in time."
+  return 1
+}
+
+# -------- Log rotation (with small backups) --------
+rotate_logs(){
+  local max_lines="${1:-5000}"
+  local now ts
+  ts="$(date +'%F-%H%M%S')"
+
+  for f in /tmp/portal_watch.log /tmp/cloudflared.log; do
+    [[ -f "$f" ]] || continue
+    # Backup
+    cp -f "$f" "${f}.bak.${ts}" 2>/dev/null || true
+    # Trim to last N lines (safe even for large files)
+    # tail -n fails if file < N lines, so we redirect safely
+    tail -n "$max_lines" "$f" > "${f}.trim.$$" 2>/dev/null || true
+    mv -f "${f}.trim.$$" "$f" 2>/dev/null || true
+  done
+
+  # Cleanup backups older than 7 days
+  find /tmp -maxdepth 1 \( -name 'portal_watch.log.bak.*' -o -name 'cloudflared.log.bak.*' \) -type f -mtime +7 -delete 2>/dev/null || true
+}
+# ---------------------------------------------------
+
+start_tunnel(){
+  local attempts=0
+  while true; do
+    attempts=$((attempts+1))
+    nohup /usr/bin/cloudflared tunnel --config "$CLOUDFLARE_CFG" run "${TUNNEL_NAME}" \
+      >> /tmp/cloudflared.log 2>&1 < /dev/null &
+    disown || true
+    sleep 2
+    if pgrep -f "/usr/bin/cloudflared tunnel --config .* run ${TUNNEL_NAME}" >/dev/null; then
+      log "Cloudflare Tunnel started (attempt ${attempts}). Logs: /tmp/cloudflared.log"
+      break
+    fi
+    log "Cloudflared failed to stay up (attempt ${attempts}); retrying in 5s…"
+    sleep 5
+  done
+}
+
+start(){
+  need_proj
+  cd "$PRJ"
+  # shellcheck source=/dev/null
+  source venv/bin/activate
+
+  if ss -ltnp | grep -q ":${PORT}\b"; then
+    log "Port ${PORT} already in use; skipping Gunicorn start."
+  else
+    log "Starting Gunicorn on ${BIND_IP}:${PORT}…"
+    gunicorn -w 2 -k gthread --threads 4 --bind ${BIND_IP}:${PORT} app:app &
+    sleep 2
+    health_wait || true
+  fi
+
+  if pgrep -f "/usr/bin/cloudflared tunnel --config .* run ${TUNNEL_NAME}" >/dev/null; then
+    log "Cloudflare Tunnel already running."
+  else
+    log "Starting Cloudflare Tunnel (${TUNNEL_NAME})…"
+    start_tunnel
+  fi
+
+  rotate_logs 5000
+}
+
+stop(){
+  log "Stopping portal…"
+  if systemctl list-unit-files --type=service | grep -q "^cloudflared.service"; then
+    systemctl is-active --quiet cloudflared && { log "Stopping service cloudflared"; sudo systemctl stop cloudflared; }
+  fi
+  if systemctl list-unit-files --type=service | grep -q "^gunicorn.service"; then
+    systemctl is-active --quiet gunicorn && { log "Stopping service gunicorn"; sudo systemctl stop gunicorn; }
+  fi
+
+  hard_kill "/usr/bin/cloudflared tunnel --config .* run ${TUNNEL_NAME}"
+  hard_kill "$PRJ/venv/bin/gunicorn"
+  hard_kill "gunicorn -w .* -b 0\.0\.0\.0:${PORT_DEV} app:app"
+
+  free_port "$PORT"
+  free_port "$PORT_DEV"
+
+  log "Remaining listeners on ${PORT}/${PORT_DEV}:"
+  ss -ltnp | egrep ":${PORT}\b|:${PORT_DEV}\b" || echo "  none"
+  log "Done."
+}
+
+status_cmd(){
+  rotate_logs 5000
+  echo "=== Ports ==="
+  ss -ltnp | egrep ":${PORT}\b|:${PORT_DEV}\b" || echo "No listeners on ${PORT}/${PORT_DEV}"
+  echo
+  echo "=== Processes ==="
+  pgrep -af "/usr/bin/cloudflared tunnel --config .* run ${TUNNEL_NAME}" || echo "No cloudflared"
+  pgrep -af gunicorn || echo "No gunicorn"
+}
+
+confirm_pause_then(){
+  local action="$1"
+  rotate_logs 5000
+  if [[ "$action" == "shutdown" ]]; then sudo shutdown -h now; else sudo reboot; fi
+}
+
+help_cmd(){
+  echo -e "${Y}Usage:${N} $(basename "$0") {start|stop|restart|status|shutdown|reboot|exit|help}"
+  echo -e "${Y}Commands:${N}"
+  printf "  ${G}start${N}     Start Gunicorn + Cloudflare Tunnel\n"
+  printf "  ${G}stop${N}      Stop Gunicorn + Cloudflare Tunnel\n"
+  printf "  ${G}restart${N}   Stop then start both services\n"
+  printf "  ${G}status${N}    Show running ports and processes (rotates logs)\n"
+  printf "  ${G}shutdown${N}  Stop portal then power off the Pi (rotates logs)\n"
+  printf "  ${G}reboot${N}    Stop portal then reboot the Pi (rotates logs)\n"
+  printf "  ${G}exit${N}      Do nothing and exit\n"
+  printf "  ${G}help${N}      Show this help message\n"
+}
+
+menu(){
+  # non-interactive shell? fall back to help
+  if [[ ! -t 0 || ! -t 1 ]]; then
+    help_cmd
+    exit 0
+  fi
+
+  trap 'echo; echo -e "'${R}'Cancelled by user'${N}'"; exit 130' INT
+
+  while true; do
+    echo
+    echo -e "${B}E‑Learning Portal Control${N}"
+    echo "---------------------------------"
+    echo "  1) Start"
+    echo "  2) Stop"
+    echo "  3) Restart"
+    echo "  4) Status (rotates logs)"
+    echo "  5) Shutdown Pi"
+    echo "  6) Reboot Pi"
+    echo "  7) Exit (do nothing)"
+    echo "  8) Help"
+    echo "  9) Quit menu"
+    echo "---------------------------------"
+    read -rp "Choose an option [1-9]: " choice
+    case "${choice}" in
+      1) start ;;
+      2) stop ;;
+      3) stop ; echo ; start ;;
+      4) status_cmd ;;
+      5) stop ; confirm_pause_then shutdown ; break ;;
+      6) stop ; confirm_pause_then reboot ; break ;;
+      7) log "Exiting without doing anything." ;;
+      8) help_cmd ;;
+      9) echo "Bye."; break ;;
+      *) echo -e "${R}Invalid choice.${N}";;
+    esac
+  done
+}
+
+# -----------------------------
+# Main
+# -----------------------------
+case "${1:-}" in
+  "")       menu ;;           # no args => interactive menu
+  start)    start ;;
+  stop)     stop ;;
+  restart)  stop ; echo ; start ; rotate_logs 5000 ;;
+  status)   status_cmd ;;
+  shutdown) stop ; confirm_pause_then shutdown ;;
+  reboot)   stop ; confirm_pause_then reboot ;;
+  exit)     log "Exiting without doing anything." ;;
+  help)     help_cmd ;;
+  *)        echo -e "${R}Unknown command:${N} ${1}"; help_cmd ; exit 2 ;;
+esac

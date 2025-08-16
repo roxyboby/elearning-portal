@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Active Users - Admin{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h2">Active Users</h1>
+                <a href="{{ url_for('admin') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+            
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card border-success">
+                        <div class="card-body text-center">
+                            <h2 class="text-success mb-0">{{ active_users_count }}</h2>
+                            <p class="text-muted mb-0">Users Online</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-info">
+                        <div class="card-body text-center">
+                            <h2 class="text-info mb-0">10</h2>
+                            <p class="text-muted mb-0">Minutes Timeout</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-warning">
+                        <div class="card-body text-center">
+                            <h2 class="text-warning mb-0" id="auto-refresh-countdown">60</h2>
+                            <p class="text-muted mb-0">Seconds to Refresh</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Users Table -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Currently Active Users</h5>
+                    <div>
+                        <small class="text-muted">Last updated: <span id="last-updated"></span></small>
+                        <button class="btn btn-sm btn-outline-primary ms-2" onclick="refreshPage()">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if active_users_list %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Email</th>
+                                    <th>Last Activity</th>
+                                    <th>Time Ago</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in active_users_list %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>
+                                        <i class="fas fa-user text-muted me-2"></i>
+                                        {{ user.email }}
+                                    </td>
+                                    <td>{{ user.last_activity.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                    <td>
+                                        {% if user.minutes_ago == 0 %}
+                                            <span class="badge bg-success">Just now</span>
+                                        {% elif user.minutes_ago < 2 %}
+                                            <span class="badge bg-success">{{ user.minutes_ago }}m ago</span>
+                                        {% elif user.minutes_ago < 5 %}
+                                            <span class="badge bg-warning">{{ user.minutes_ago }}m ago</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">{{ user.minutes_ago }}m ago</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user.minutes_ago < 2 %}
+                                            <span class="text-success">
+                                                <i class="fas fa-circle"></i> Very Active
+                                            </span>
+                                        {% elif user.minutes_ago < 5 %}
+                                            <span class="text-warning">
+                                                <i class="fas fa-circle"></i> Active
+                                            </span>
+                                        {% else %}
+                                            <span class="text-danger">
+                                                <i class="fas fa-circle"></i> Less Active
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Active Users</h5>
+                        <p class="text-muted">No users are currently logged in to the system.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Information Panel -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Session Management Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Session Timeout Policy</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success"></i> Sessions expire after 10 minutes of inactivity</li>
+                                <li><i class="fas fa-check text-success"></i> Users are automatically logged out when timeout occurs</li>
+                                <li><i class="fas fa-check text-success"></i> Session activity is tracked in real-time</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Activity Tracking</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success"></i> Page views update user activity</li>
+                                <li><i class="fas fa-check text-success"></i> Inactive users are cleaned up automatically</li>
+                                <li><i class="fas fa-check text-success"></i> Admin dashboard shows real-time status</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-refresh functionality
+let refreshCountdown = 60;
+const countdownElement = document.getElementById('auto-refresh-countdown');
+const lastUpdatedElement = document.getElementById('last-updated');
+
+function updateCountdown() {
+    refreshCountdown--;
+    if (countdownElement) {
+        countdownElement.textContent = refreshCountdown;
+    }
+    
+    if (refreshCountdown <= 0) {
+        refreshPage();
+    }
+}
+
+function refreshPage() {
+    location.reload();
+}
+
+function updateLastUpdated() {
+    if (lastUpdatedElement) {
+        const now = new Date();
+        lastUpdatedElement.textContent = now.toLocaleTimeString();
+    }
+}
+
+// Start countdown
+setInterval(updateCountdown, 1000);
+
+// Update last updated time on page load
+updateLastUpdated();
+</script>
+{% endblock %}

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive ITIL 4 Foundation Training</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .content-pane { display: none; }
+        .content-pane.active { display: block; }
+        .nav-link.active {
+            background-color: #ede9fe; /* light-violet */
+            color: #5b21b6; /* deep-violet */
+            font-weight: 600;
+        }
+        .quiz-question {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .result-feedback {
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1.5rem;
+        }
+        .correct {
+            background-color: #dcfce7;
+            border-left: 5px solid #22c55e;
+        }
+        .incorrect {
+            background-color: #fee2e2;
+            border-left: 5px solid #ef4444;
+        }
+        /* Simple transition for pane visibility */
+        .content-pane {
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0;
+        }
+        .content-pane.active {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">ITIL® 4 Foundation Interactive Training 🚀</h1>
+            <p class="text-lg text-gray-600 mt-2">Your personal mentorship for ITIL 4 certification.</p>
+        </header>
+
+        <div class="lg:grid lg:grid-cols-12 lg:gap-8">
+            <!-- Navigation Sidebar -->
+            <nav id="navigation" class="lg:col-span-3 bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6 lg:mb-0">
+                <h2 class="text-xl font-bold mb-4 text-gray-800">ITIL 4 Roadmap</h2>
+                <ul class="space-y-4">
+                    <!-- Prerequisites -->
+                    <li>
+                        <h3 class="font-semibold text-gray-700">Getting Started</h3>
+                        <ul class="mt-2 ml-4 space-y-1 border-l-2 border-violet-200">
+                            <li><a href="#" class="nav-link block p-2 rounded-md hover:bg-gray-100" data-target="content-prereqs">Exam Prerequisites</a></li>
+                        </ul>
+                    </li>
+                    <!-- Key Concepts -->
+                    <li>
+                        <h3 class="font-semibold text-gray-700">1. Key Concepts</h3>
+                        <ul class="mt-2 ml-4 space-y-1 border-l-2 border-violet-200">
+                            <li><a href="#" class="nav-link block p-2 rounded-md hover:bg-gray-100" data-target="content-1-1">1.1 Service, Value & Co-creation</a></li>
+                            <li><a href="#" class="nav-link block p-2 rounded-md hover:bg-gray-100" data-target="content-1-2">1.2 Stakeholders</a></li>
+                        </ul>
+                    </li>
+                    <!-- Other Sections (placeholders) -->
+                    <li><h3 class="font-semibold text-gray-500">2. The Four Dimensions (Coming Soon)</h3></li>
+                    <li><h3 class="font-semibold text-gray-500">3. The Service Value System (Coming Soon)</h3></li>
+                    <li><h3 class="font-semibold text-gray-500">4. Key Practices (Coming Soon)</h3></li>
+                </ul>
+            </nav>
+
+            <!-- Content Area -->
+            <main id="content-area" class="lg:col-span-9">
+                <!-- Welcome Pane -->
+                <div id="content-welcome" class="content-pane active bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200">
+                    <h2 class="text-2xl font-bold text-violet-800 mb-4">Welcome to Your ITIL 4 Journey!</h2>
+                    <p class="text-base leading-relaxed">
+                        This is your interactive learning center, designed to be your sole resource for certification. Select a topic from the roadmap on the left to begin.
+                        <br><br>
+                        We'll start with the exam prerequisites and then dive into the core concepts of service management. Let's get started!
+                    </p>
+                </div>
+
+                <!-- Prerequisites Content -->
+                <div id="content-prereqs" class="content-pane bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200">
+                    <h2 class="text-2xl font-bold text-violet-800 mb-4">ITIL 4 Foundation: Requirements</h2>
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-2 text-gray-700">Analogy: Getting a Library Card</h3>
+                        <blockquote class="border-l-4 border-violet-500 bg-violet-50 p-4 rounded-r-lg text-gray-600">
+                            Think of the ITIL 4 Foundation exam like getting a library card. The library doesn't ask if you've read Shakespeare or have a PhD in literature. They just need you to show up, learn the rules (how to check out books, due dates), and pass their simple "test" (filling out the form correctly). The goal is to give you access to the library's resources, just as the ITIL Foundation gives you access to the language of modern IT service management.
+                        </blockquote>
+                    </div>
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold mb-2 text-gray-700">The Key Requirements</h3>
+                        <ul class="space-y-4 text-gray-800">
+                            <li><strong class="text-gray-900">1. Training (Recommended)</strong><p class="ml-4 mt-1">While not mandatory, taking an accredited training course (like this one!) is highly recommended. It ensures you cover all the necessary topics in a structured way.</p></li>
+                            <li><strong class="text-gray-900">2. The Exam</strong><p class="ml-4 mt-1">This is the only formal step. You must pass the ITIL 4 Foundation exam.</p><ul class="list-disc list-inside ml-8 mt-2 space-y-1"><li><strong>Format:</strong> 40 multiple-choice questions.</li><li><strong>Duration:</strong> 60 minutes (75 minutes if English is not your first language).</li><li><strong>Passing Score:</strong> 65% (you need to answer 26 out of 40 questions correctly).</li><li><strong>Rules:</strong> It is a closed-book exam.</li></ul></li>
+                        </ul>
+                    </div>
+                    <div><h3 class="text-lg font-semibold mb-4 text-gray-700">Test Your Knowledge</h3><form id="quiz-prereqs" data-answers='{"q1": "b", "q2": "d", "q3": "a"}'><div class="quiz-question"><p class="font-semibold mb-2">1. A candidate wants to take the ITIL 4 Foundation exam. What is the minimum number of questions they must answer correctly to pass?</p><div class="space-y-2 mt-2"><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q1" value="a" class="mr-3"> 20</label><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q1" value="b" class="mr-3"> 26</label><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q1" value="c" class="mr-3"> 30</label><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q1" value="d" class="mr-3"> 40</label></div></div><div class="quiz-question"><p class="font-semibold mb-2">2. What is the duration of the ITIL 4 Foundation exam for a candidate whose native language is NOT English?</p><div class="space-y-2 mt-2"><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q2" value="a" class="mr-3"> 40 minutes</label><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q2" value="b" class="mr-3"> 60 minutes</label><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q2" value="c" class="mr-3"> 65 minutes</label><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q2" value="d" class="mr-3"> 75 minutes</label></div></div><div class="quiz-question"><p class="font-semibold mb-2">3. Which of the following is a key characteristic of the ITIL 4 Foundation exam environment?</p><div class="space-y-2 mt-2"><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q3" value="a" class="mr-3"> It is a closed-book exam.</label><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q3" value="b" class="mr-3"> Candidates can use the official ITIL 4 manual.</label><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q3" value="c" class="mr-3"> It is an open-book exam.</label><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q3" value="d" class="mr-3"> Candidates are allowed one page of notes.</label></div></div><button type="submit" class="mt-4 w-full sm:w-auto bg-violet-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-violet-700 transition-colors">Submit Answers</button></form><div id="results-prereqs" class="hidden mt-6"></div></div>
+                </div>
+
+                <!-- Key Concept 1.1 Content -->
+                <div id="content-1-1" class="content-pane bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200">
+                    <h2 class="text-2xl font-bold text-violet-800 mb-4">1.1: Service, Value, and Value Co-creation</h2>
+                    <div class="mb-6"><h3 class="text-lg font-semibold mb-2 text-gray-700">Analogy: Ordering a Pizza</h3><blockquote class="border-l-4 border-violet-500 bg-violet-50 p-4 rounded-r-lg text-gray-600">Imagine you order a pizza online.<ul><li class="mt-1">The <strong>Service</strong> isn't just the pizza itself. It's the entire experience: the easy-to-use website, the payment processing, the delivery to your door, and the customer support if something goes wrong. You get the outcome (a delicious meal) without owning a pizza oven or hiring a delivery driver.</li><li class="mt-1">The <strong>Value</strong> is your personal satisfaction. Was it worth the price? Did it arrive hot and on time? Did it satisfy your hunger? This is subjective and defined by you, the customer. Your friend might order the same pizza and find less value if it arrives late.</li><li class="mt-1"><strong>Value Co-creation</strong> happens because the pizza place can't create value alone. You, the consumer, must participate. You provide a correct address, have money to pay, and are home to receive the pizza. Both you and the provider work together to create the final value.</li></ul></blockquote></div>
+                    <div class="mb-8"><h3 class="text-lg font-semibold mb-2 text-gray-700">Core Concepts</h3><ul class="list-disc list-inside space-y-3 text-gray-800"><li><strong>Service:</strong> A means of enabling value co-creation by facilitating <strong>outcomes</strong> that customers want to achieve. The customer does not need to manage the specific <strong>costs and risks</strong> associated with the service.</li><li><strong>Value:</strong> The perceived benefits, usefulness, and importance of something. It is always defined by the service <strong>consumer</strong> (the recipient).</li><li><strong>Value Co-creation:</strong> The mutual creation of value by the service provider and the service consumer. Value is not delivered; it is co-created.</li><li><strong>Service Relationship:</strong> The cooperation between a service provider and a service consumer. This includes service provision, service consumption, and service relationship management.</li></ul></div>
+                    <div><h3 class="text-lg font-semibold mb-4 text-gray-700">Test Your Knowledge</h3><form id="quiz-1-1" data-answers='{"q1": "c", "q2": "a"}'><div class="quiz-question"><p class="font-semibold mb-2">1. Which statement BEST describes the ITIL concept of 'value'?</p><div class="space-y-2 mt-2"><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q1" value="a" class="mr-3"> It is the monetary worth of a service, as listed in a service catalog.</label><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q1" value="b" class="mr-3"> It is created by the service provider and delivered to the consumer.</label><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q1" value="c" class="mr-3"> It is the perceived benefits and usefulness as defined by the consumer.</label><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q1" value="d" class="mr-3"> It is the total of all components and activities used to provide a service.</label></div></div><div class="quiz-question"><p class="font-semibold mb-2">2. A software company provides a cloud-based accounting application. A customer uses this application to manage their finances and generate tax reports. Which is an example of value co-creation?</p><div class="space-y-2 mt-2"><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q2" value="a" class="mr-3"> The customer accurately enters their financial data into the application.</label><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q2" value="b" class="mr-3"> The software company releases a new feature for the application.</label><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q2" value="c" class="mr-3"> The software company's servers have a 99.9% uptime.</label><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q2" value="d" class="mr-3"> The software company publishes a user manual for the application.</label></div></div><button type="submit" class="mt-4 w-full sm:w-auto bg-violet-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-violet-700 transition-colors">Submit Answers</button></form><div id="results-1-1" class="hidden mt-6"></div></div>
+                </div>
+                
+                <!-- Key Concept 1.2 Content -->
+                <div id="content-1-2" class="content-pane bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200">
+                    <h2 class="text-2xl font-bold text-violet-800 mb-4">1.2: Stakeholders in Service Management</h2>
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-2 text-gray-700">Analogy: A School Play</h3>
+                        <blockquote class="border-l-4 border-violet-500 bg-violet-50 p-4 rounded-r-lg text-gray-600">
+                           Imagine a school putting on a play. Several people are involved in making it a success:
+                            <ul>
+                                <li class="mt-1">The <strong>Sponsor</strong> is the School Principal. They provide the budget and give the final approval for the play to happen. They authorize the cost.</li>
+                                <li class="mt-1">The <strong>Customer</strong> is the Drama Teacher. They decide which play to perform, what the costumes should look like, and define what a "successful" performance is. They define the requirements.</li>
+                                <li class="mt-1">The <strong>Users</strong> are the students—the actors, the stage crew, the musicians. They are the ones actively using the stage, the props, and the costumes to perform the play.</li>
+                                <li class="mt-1">The <strong>Service Provider</strong> is the Drama Club itself, which organizes the auditions, rehearsals, and coordinates everything to deliver the final performance.</li>
+                            </ul>
+                        </blockquote>
+                    </div>
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold mb-2 text-gray-700">Core Concepts</h3>
+                        <ul class="list-disc list-inside space-y-3 text-gray-800">
+                            <li><strong>Service Consumer:</strong> A generic role that can be broken down into three more specific roles: Customer, User, and Sponsor.</li>
+                            <li><strong>Customer:</strong> The role that defines the requirements for a service and takes responsibility for the outcomes of service consumption.</li>
+                            <li><strong>User:</strong> The role that uses services.</li>
+                            <li><strong>Sponsor:</strong> The role that authorizes the budget for service consumption.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4 text-gray-700">Test Your Knowledge</h3>
+                        <form id="quiz-1-2" data-answers='{"q1": "d", "q2": "b"}'><div class="quiz-question"><p class="font-semibold mb-2">1. A department manager approves the funding for a new email service for their team. In ITIL terms, what is this manager's primary role?</p><div class="space-y-2 mt-2"><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q1" value="a" class="mr-3"> User</label><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q1" value="b" class="mr-3"> Service Provider</label><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q1" value="c" class="mr-3"> Customer</label><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q1" value="d" class="mr-3"> Sponsor</label></div></div><div class="quiz-question"><p class="font-semibold mb-2">2. An employee uses a laptop and software provided by their company to perform their daily tasks. What is this employee's role in the context of the laptop service?</p><div class="space-y-2 mt-2"><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q2" value="a" class="mr-3"> Customer</label><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q2" value="b" class="mr-3"> User</label><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q2" value="c" class="mr-3"> Sponsor</label><label class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="radio" name="q2" value="d" class="mr-3"> Service Consumer</label></div></div><button type="submit" class="mt-4 w-full sm:w-auto bg-violet-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-violet-700 transition-colors">Submit Answers</button></form><div id="results-1-2" class="hidden mt-6"></div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentPanes = document.querySelectorAll('.content-pane');
+            const navigation = document.getElementById('navigation');
+
+            // --- Navigation Logic ---
+            navigation.addEventListener('click', (e) => {
+                const link = e.target.closest('a');
+                if (link && !link.classList.contains('cursor-not-allowed')) {
+                    e.preventDefault();
+                    
+                    const targetId = link.getAttribute('data-target');
+                    
+                    contentPanes.forEach(pane => {
+                        if (pane.id === targetId) {
+                            pane.classList.add('active');
+                        } else {
+                            pane.classList.remove('active');
+                        }
+                    });
+
+                    navLinks.forEach(navLink => navLink.classList.remove('active'));
+                    link.classList.add('active');
+                }
+            });
+            
+            // --- Quiz Logic ---
+            const quizForms = document.querySelectorAll('form[id^="quiz-"]');
+            quizForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formId = form.id;
+                    const resultsContainer = document.getElementById(`results-${formId.substring(5)}`);
+                    const correctAnswers = JSON.parse(form.dataset.answers);
+                    const questions = Object.keys(correctAnswers);
+                    
+                    let score = 0;
+                    let resultsHTML = '';
+                    
+                    questions.forEach((q, index) => {
+                        const questionNumber = index + 1;
+                        const userAnswer = form.elements[q]?.value;
+                        const correctAnswer = correctAnswers[q];
+
+                        const questionEl = form.querySelector(`input[name="${q}"]`).closest('.quiz-question');
+                        const questionText = questionEl.querySelector('p').textContent;
+
+                        if (userAnswer === correctAnswer) {
+                            score++;
+                            resultsHTML += `<div class="result-feedback correct"><p class="font-bold">Question ${questionNumber}: Correct!</p></div>`;
+                        } else {
+                            const userAnswerText = userAnswer ? form.querySelector(`input[name="${q}"][value="${userAnswer}"]`).parentElement.textContent.trim() : 'Not Answered';
+                            const correctAnswerText = form.querySelector(`input[name="${q}"][value="${correctAnswer}"]`).parentElement.textContent.trim();
+                            resultsHTML += `
+                                <div class="result-feedback incorrect">
+                                    <p class="font-bold">Question ${questionNumber}: Incorrect</p>
+                                    <p class="text-sm mt-1 text-gray-700"><b>Your Answer:</b> ${userAnswerText}</p>
+                                    <p class="text-sm mt-1 text-gray-700"><b>Correct Answer:</b> ${correctAnswerText}</p>
+                                    <p class="text-sm mt-2 pt-2 border-t border-red-200"><b>Explanation:</b> ${getExplanation(formId, q)}</p>
+                                </div>`;
+                        }
+                    });
+
+                    const totalQuestions = questions.length;
+                    resultsContainer.innerHTML = `
+                        <h3 class="text-xl font-bold">Quiz Results</h3>
+                        <p class="my-2 p-3 bg-gray-100 rounded-lg font-semibold">You scored ${score} out of ${totalQuestions}</p>
+                        <div class="space-y-4 mt-4">${resultsHTML}</div>
+                    `;
+                    resultsContainer.classList.remove('hidden');
+                });
+            });
+
+            function getExplanation(formId, questionKey) {
+                const explanations = {
+                    'quiz-prereqs': {
+                        'q1': 'The ITIL 4 Foundation exam has 40 questions, and a score of 65% is required to pass. 65% of 40 is 26.',
+                        'q2': 'To ensure fairness, candidates taking the exam in a language that is not their native tongue are given an additional 15 minutes, for a total of 75 minutes.',
+                        'q3': 'The ITIL 4 Foundation is a "closed-book" exam. This means you cannot bring any notes, books, or other reference materials into the testing environment.'
+                    },
+                    'quiz-1-1': {
+                        'q1': 'Value is subjective and is always determined from the perspective of the service consumer. It\'s about the benefits and usefulness they perceive, not just the cost or the components of the service.',
+                        'q2': 'Value co-creation requires active participation from the consumer. By entering their own data, the customer is actively contributing to the service to achieve their desired outcome (managed finances). The other options are actions taken solely by the provider.'
+                    },
+                    'quiz-1-2': {
+                        'q1': 'The role that authorizes budget for service consumption is the Sponsor. They are the ones who provide the financial resources for the service.',
+                        'q2': 'The role that directly uses a service to perform tasks is the User. While they are also a "Service Consumer", "User" is the most specific and correct term in this context.'
+                    }
+                };
+                return explanations[formId]?.[questionKey] || 'No explanation available.';
+            }
+
+            // Set the first link in the first section as active by default on page load
+            const firstLink = document.querySelector('#navigation ul > li:first-child ul li:first-child a');
+            if(firstLink){
+                 firstLink.click();
+            } else {
+                 // If no links, keep welcome active
+                 document.getElementById('content-welcome').classList.add('active');
+            }
+        });
+    </script>
+</body>
+</html>

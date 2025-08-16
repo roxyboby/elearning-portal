@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">{{ course.title }}</h1>
+    <a class="btn btn-outline-secondary" href="{{ url_for('admin_courses') }}">← Back to Courses</a>
+  </div>
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <div class="d-flex gap-3 align-items-center">
+        <span class="badge {{ 'text-bg-success' if course.published else 'text-bg-secondary' }}">
+          {{ 'Published' if course.published else 'Draft' }}
+        </span>
+        <span class="fw-semibold">₹{{ course.price }}</span>
+      </div>
+      <p class="text-muted mb-0">{{ course.short_desc }}</p>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h5 mb-0">Sections</h2>
+    <a class="btn btn-primary btn-sm" href="{{ url_for('admin_sections_new', course_id=course.id) }}">+ New Section</a>
+  </div>
+
+<!-- Change Cover Image -->
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <div class="d-flex align-items-center gap-3">
+      <!-- Current cover preview -->
+      {% if course.cover_image %}
+        <img src="{{ url_for('static', filename=course.cover_image) }}"
+             alt="Current cover"
+             style="width: 200px; height: 110px; object-fit: cover; border-radius: 6px;">
+      {% else %}
+        <img src="{{ url_for('static', filename='uploads/covers/default_cover.jpg') }}"
+             alt="Current cover"
+             style="width: 200px; height: 110px; object-fit: cover; border-radius: 6px;">
+      {% endif %}
+
+      <!-- Upload form -->
+      <form method="post"
+            action="{{ url_for('admin_course_cover', course_id=course.id) }}"
+            enctype="multipart/form-data"
+            class="d-flex align-items-center gap-2">
+        <input type="file" name="cover" accept=".jpg,.jpeg,.png,.gif,.webp" class="form-control" required>
+        <button type="submit" class="btn btn-sm btn-primary">Change cover</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+  {% if sections %}
+    <ol class="list-group list-group-numbered">
+      {% for s in sections %}
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="fw-semibold">
+              {{ s.title }}
+              <span class="text-muted small">(#{{ s.position }})</span>
+            </div>
+            <div class="text-nowrap">
+              <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin_section_edit', section_id=s.id) }}">Edit</a>
+              <form method="post"
+                    action="{{ url_for('admin_section_delete', section_id=s.id) }}"
+                    style="display:inline-block"
+                    onsubmit="return confirm('Delete this section and all its pages?');">
+                <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+              </form>
+              <a class="btn btn-sm btn-outline-primary"
+                 href="{{ url_for('admin_sections_new', course_id=course.id) }}?position={{ s.position - 1 }}">
+                 + Insert Above
+              </a>
+              <a class="btn btn-sm btn-outline-primary"
+                 href="{{ url_for('admin_sections_new', course_id=course.id) }}?position={{ s.position + 1 }}">
+                 + Insert Below
+              </a>
+            </div>
+          </div>
+
+          {% set pages = pages_by_section.get(s.id, []) %}
+          <ul class="mt-2">
+            {% for p in pages %}
+              <li class="d-flex justify-content-between align-items-center">
+                <div>
+                  {% if p.is_free %}
+                    <span class="badge text-bg-info me-2">Free</span>
+                  {% endif %}
+                  {{ p.title }}
+                  <span class="text-muted small">(#{{ p.position }})</span>
+                  <span class="text-muted small"> — {{ p.filename }}</span>
+                </div>
+                <div class="text-nowrap">
+                  <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin_page_edit', page_id=p.id) }}">Edit</a>
+                  <form method="post"
+                        action="{{ url_for('admin_page_delete', page_id=p.id) }}"
+                        style="display:inline-block"
+                        onsubmit="return confirm('Delete this page?');">
+                    <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                  </form>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+
+          <div class="mt-2">
+            <a class="btn btn-outline-primary btn-sm" href="{{ url_for('admin_pages_new', section_id=s.id) }}">+ New Page</a>
+          </div>
+        </li>
+      {% endfor %}
+    </ol>
+  {% else %}
+    <div class="alert alert-info">No sections yet.</div>
+  {% endif %}
+{% endblock %}

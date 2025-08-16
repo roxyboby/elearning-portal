@@ -1,0 +1,676 @@
+{% extends "base.html" %}
+
+{% block title %}Transform Your Future with AI-Based Learning Courses - E-Learning Portal{% endblock %}
+
+{% block content %}
+<!-- Hero Section with Image Upload -->
+<section class="hero-section">
+    <div class="hero-image-container">
+        {% if hero_image %}
+            <img src="{{ hero_image }}" alt="E-Learning Hero" class="hero-image">
+        {% else %}
+            <div class="hero-image-placeholder">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Admin Image Upload Controls -->
+    {% if current_user.is_authenticated and current_user.is_admin %}
+    <div class="hero-image-controls">
+        <button class="btn image-upload-btn" onclick="openImageUploadModal()">
+            <i class="fas fa-camera me-1"></i>
+            <span class="desktop-only">Change Hero Image</span>
+            <span class="mobile-only">Change</span>
+        </button>
+    </div>
+    {% endif %}
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="hero-content">
+                    <h1 class="hero-title">
+                        Transform Your Future with AI-Based Learning Courses
+                    </h1>
+                    <p class="hero-subtitle">
+                        <span class="mobile-only">Discover world-class courses designed to accelerate your career growth</span>
+                        <span class="desktop-only">Discover world-class courses and expert-led programs designed to accelerate your career growth and unlock your potential</span>
+                    </p>
+                    <div class="hero-buttons">
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('catalog') }}" class="btn btn-light btn-lg me-3 mb-2">
+                                <i class="fas fa-book me-2"></i>
+                                <span class="desktop-only">Explore Courses</span>
+                                <span class="mobile-only">Courses</span>
+                            </a>
+                            <a href="{{ url_for('my_courses') }}" class="btn btn-outline-light btn-lg mb-2">
+                                <i class="fas fa-user me-2"></i>
+                                <span class="desktop-only">My Courses</span>
+                                <span class="mobile-only">My Courses</span>
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('register') }}" class="btn btn-light btn-lg me-3 mb-2">
+                                <i class="fas fa-rocket me-2"></i>
+                                <span class="desktop-only">Start Learning Today</span>
+                                <span class="mobile-only">Get Started</span>
+                            </a>
+                            <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg mb-2">
+                                <i class="fas fa-sign-in-alt me-2"></i>
+                                <span class="desktop-only">Sign In</span>
+                                <span class="mobile-only">Login</span>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Hero Image Upload Modal (Admin Only) -->
+{% if current_user.is_authenticated and current_user.is_admin %}
+<div class="modal fade" id="imageUploadModal" tabindex="-1" aria-labelledby="imageUploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageUploadModalLabel">
+                    <i class="fas fa-image me-2"></i>Manage Hero Image
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Current Image Display -->
+                {% if hero_image %}
+                <div class="mb-4">
+                    <h6 class="mb-2">Current Hero Image:</h6>
+                    <img src="{{ hero_image }}" alt="Current Hero" class="img-fluid rounded" style="max-height: 200px;">
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteHeroImage()">
+                            <i class="fas fa-trash me-1"></i>Delete Current Image
+                        </button>
+                    </div>
+                </div>
+                <hr>
+                {% endif %}
+
+                <!-- Upload New Image -->
+                <form id="heroImageUploadForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="heroImageFile" class="form-label">
+                            <i class="fas fa-upload me-1"></i>Upload New Hero Image
+                        </label>
+                        <input type="file" class="form-control" id="heroImageFile" name="heroImage" accept="image/*" required>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Recommended size: 1920x1080 pixels. Supported formats: PNG, JPG, JPEG, GIF, WebP. Max file size: 5MB.
+                        </div>
+                    </div>
+
+                    <!-- Image Preview -->
+                    <div class="mb-3">
+                        <img id="imagePreview" src="#" alt="Preview"
+                             style="max-width: 100%; height: auto; display: none; border-radius: 0.5rem; border: 2px solid var(--border-color);">
+                    </div>
+
+                    <!-- Upload Tips -->
+                    <div class="alert alert-info">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <strong>Tips for best results:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Use high-quality images with good lighting</li>
+                            <li>Images will be automatically optimized and resized</li>
+                            <li>Landscape orientation works best for hero sections</li>
+                            <li>Avoid images with important content at the edges</li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-primary" onclick="uploadHeroImage()">
+                    <i class="fas fa-upload me-1"></i>Upload Image
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Statistics Section -->
+<section class="py-4 py-md-5 bg-light">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-6 col-md-3 mb-3">
+                <div class="stat-item">
+                    <h3 class="stat-number text-primary mb-1" data-count="5000">0</h3>
+                    <p class="stat-label mb-0 small">Students</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="stat-item">
+                    <h3 class="stat-number text-primary mb-1" data-count="150">0</h3>
+                    <p class="stat-label mb-0 small">Courses</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="stat-item">
+                    <h3 class="stat-number text-primary mb-1" data-count="50">0</h3>
+                    <p class="stat-label mb-0 small">Instructors</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="stat-item">
+                    <h3 class="stat-number text-primary mb-1" data-count="98">0</h3>
+                    <p class="stat-label mb-0 small">Success Rate</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-4 py-md-5">
+    <div class="container">
+        <div class="row justify-content-center mb-4 mb-md-5">
+            <div class="col-lg-8 text-center">
+                <h2 class="section-title mb-3">Why Choose Our Platform?</h2>
+                <p class="section-subtitle text-muted">
+                    <span class="mobile-only">AI-powered learning designed for your success</span>
+                    <span class="desktop-only">Experience the future of education with AI-powered learning paths designed specifically for your success</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Feature 1 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 feature-card border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-brain text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title">AI-Based Learning</h5>
+                        <p class="card-text text-muted">
+                            <span class="mobile-only">Smart recommendations based on your progress</span>
+                            <span class="desktop-only">Intelligent course recommendations and personalized learning paths powered by advanced AI algorithms</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 feature-card border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-users text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title">Expert Instructors</h5>
+                        <p class="card-text text-muted">
+                            <span class="mobile-only">Learn from industry professionals</span>
+                            <span class="desktop-only">Learn from world-class instructors and industry professionals with years of real-world experience</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 feature-card border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-certificate text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title">Certified Learning</h5>
+                        <p class="card-text text-muted">
+                            <span class="mobile-only">Earn recognized certificates</span>
+                            <span class="desktop-only">Earn industry-recognized certificates that validate your skills and boost your career prospects</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+/* Hero Section Styles */
+.hero-section {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 3rem 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    min-height: 300px;
+}
+
+@media (min-width: 768px) {
+    .hero-section {
+        padding: 6rem 0;
+        min-height: 500px;
+    }
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    animation: fadeInUp 1s ease-out;
+}
+
+/* FIXED: Hero Title - No More Typing Animation */
+.hero-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+    text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.8);
+    animation: fadeInUp 1s ease-out;
+    /* Removed all typing animation properties */
+}
+
+@media (min-width: 768px) {
+    .hero-title {
+        font-size: 3.5rem;
+        margin-bottom: 1.5rem;
+    }
+}
+
+.hero-subtitle {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    opacity: 1;
+    text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.9);
+    font-weight: 600;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    display: inline-block;
+}
+
+@media (min-width: 768px) {
+    .hero-subtitle {
+        font-size: 1.25rem;
+        margin-bottom: 2rem;
+    }
+}
+
+.hero-image-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    opacity: 0.8;
+}
+
+.hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero-image-placeholder {
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.hero-image-controls {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 3;
+}
+
+.image-upload-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.image-upload-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    color: white;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+@media (min-width: 768px) {
+    .stat-number {
+        font-size: 2rem;
+    }
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+@media (min-width: 768px) {
+    .section-title {
+        font-size: 2.5rem;
+    }
+}
+
+.feature-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    opacity: 0;
+    animation: slideInUp 0.6s ease forwards;
+}
+
+.feature-card:nth-child(1) { animation-delay: 0.1s; }
+.feature-card:nth-child(2) { animation-delay: 0.2s; }
+.feature-card:nth-child(3) { animation-delay: 0.3s; }
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+.feature-icon {
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover .feature-icon {
+    transform: scale(1.1);
+}
+
+.feature-icon i {
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover .feature-icon i {
+    transform: scale(1.2) rotate(5deg);
+}
+
+/* Floating Animation for Placeholder Icon */
+.hero-image-placeholder i {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Professional Button Enhancement for Hero Section */
+.hero-buttons .btn {
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    font-weight: 600;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.hero-buttons .btn-light {
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--primary-color);
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+.hero-buttons .btn-light:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.hero-buttons .btn-outline-light {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.hero-buttons .btn-outline-light:hover {
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--primary-color);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(5deg); }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Performance Optimization */
+.hero-section, .hero-content, .feature-card {
+    transform: translateZ(0); /* Force hardware acceleration */
+}
+</style>
+
+<script>
+// Hero Image Upload Functions (Admin Only)
+function openImageUploadModal() {
+    const modal = new bootstrap.Modal(document.getElementById('imageUploadModal'));
+    modal.show();
+}
+
+function uploadHeroImage() {
+    const fileInput = document.getElementById('heroImageFile');
+    const file = fileInput.files[0];
+
+    if (!file) {
+        showAlert('Please select an image file', 'warning');
+        return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+        showAlert('File too large. Maximum size is 5MB.', 'danger');
+        return;
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+        showAlert('Invalid file type. Please upload PNG, JPG, JPEG, GIF, or WebP files.', 'danger');
+        return;
+    }
+
+    // Show loading state
+    const uploadBtn = document.querySelector('#imageUploadModal .btn-primary');
+    const originalText = uploadBtn.innerHTML;
+    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Uploading...';
+    uploadBtn.disabled = true;
+
+    // Create FormData and upload
+    const formData = new FormData();
+    formData.append('heroImage', file);
+
+    fetch('/upload-hero-image', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(data.message, 'success');
+
+            // Update hero image
+            const heroImageContainer = document.querySelector('.hero-image-container');
+            if (heroImageContainer) {
+                heroImageContainer.innerHTML = `<img src="${data.image_url}" alt="E-Learning Hero" class="hero-image">`;
+            }
+
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('imageUploadModal'));
+            modal.hide();
+
+            // Reset form
+            document.getElementById('heroImageUploadForm').reset();
+            document.getElementById('imagePreview').style.display = 'none';
+        } else {
+            showAlert(data.message, 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Upload error:', error);
+        showAlert('Upload failed. Please try again.', 'danger');
+    })
+    .finally(() => {
+        // Restore button state
+        uploadBtn.innerHTML = originalText;
+        uploadBtn.disabled = false;
+    });
+}
+
+function deleteHeroImage() {
+    if (!confirm('Are you sure you want to delete the current hero image?')) {
+        return;
+    }
+
+    fetch('/delete-hero-image', {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(data.message, 'success');
+
+            // Update hero image to placeholder
+            const heroImageContainer = document.querySelector('.hero-image-container');
+            if (heroImageContainer) {
+                heroImageContainer.innerHTML = `
+                    <div class="hero-image-placeholder">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                `;
+            }
+        } else {
+            showAlert(data.message, 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Delete error:', error);
+        showAlert('Delete failed. Please try again.', 'danger');
+    });
+}
+
+// Image Preview
+document.getElementById('heroImageFile')?.addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('imagePreview');
+
+    if (file) {
+        // Validate file size
+        if (file.size > 5 * 1024 * 1024) {
+            showAlert('File too large. Maximum size is 5MB.', 'warning');
+            this.value = '';
+            preview.style.display = 'none';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Alert Helper Function
+function showAlert(message, type) {
+    // Remove existing alerts
+    document.querySelectorAll('.dynamic-alert').forEach(alert => alert.remove());
+
+    // Create new alert
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show dynamic-alert`;
+    alertDiv.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+    // Insert at top of main content
+    const main = document.querySelector('main');
+    if (main) {
+        main.insertBefore(alertDiv, main.firstChild);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+}
+
+// Animate statistics counters
+function animateCounters() {
+    const counters = document.querySelectorAll('.stat-number');
+
+    counters.forEach(counter => {
+        const target = parseInt(counter.getAttribute('data-count'));
+        const increment = target / 100;
+        let current = 0;
+
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                current = target;
+                clearInterval(timer);
+            }
+            counter.textContent = Math.floor(current) + (target === 98 ? '%' : '+');
+        }, 20);
+    });
+}
+
+// Trigger animation when section is visible
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            animateCounters();
+            observer.unobserve(entry.target);
+        }
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const statsSection = document.querySelector('.stat-number')?.closest('section');
+    if (statsSection) {
+        observer.observe(statsSection);
+    }
+});
+</script>
+{% endblock %}

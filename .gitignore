@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+
+# Environment variables
+.env
+
+# Old backup files (we have Git now)
+*.backup
+*.bak
+*.save
+*.backup.*
+*.bak.*
+app.py.bad.*
+app.py.pre_fixer
+app.working.py
+models.backup.py
+models1.py
+
+# Old backup directories
+backups/
+restore_test_*/
+templates.bak.*/
+
+# Temporary files
+filename
+*.tmp
+
+# Strange characters
+"\033[D\033[C"
+"\033[D\033[C.pub"
+
+# Additional cleanup
+app.py.save.*
+*"\033[D\033[C"*

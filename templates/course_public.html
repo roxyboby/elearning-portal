@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <!-- Course header -->
+      <div class="card shadow-sm mb-3">
+        <div class="card-body">
+          <h1 class="h4 mb-2">{{ course.title }}</h1>
+          <p class="text-muted mb-1">{{ course.short_desc }}</p>
+          <div class="d-flex gap-3 align-items-center">
+            <span class="badge {{ 'text-bg-success' if course.published else 'text-bg-secondary' }}">
+              {{ 'Published' if course.published else 'Draft' }}
+            </span>
+            <span class="fw-semibold">₹{{ course.price }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress card -->
+      <a id="progress"></a>
+      <div class="card shadow-sm mb-3">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="fw-semibold">Your Progress</div>
+            <div class="text-muted">{{ progress_done }}/{{ progress_total }} ({{ progress_pct }}%)</div>
+          </div>
+          <div class="progress" style="height: 12px;">
+            <div class="progress-bar" role="progressbar"
+                 style="width: {{ progress_pct }}%;"
+                 aria-valuenow="{{ progress_pct }}" aria-valuemin="0" aria-valuemax="100">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Syllabus -->
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Syllabus</h2>
+          {% if sections %}
+            <ol>
+              {% for s in sections %}
+                <li class="mb-2">
+                  <div class="fw-semibold">{{ s.title }}</div>
+                  {% set pages = pages_by_section.get(s.id, []) %}
+                  {% if pages %}
+                    <ul class="mb-2">
+                      {% for p in pages %}
+                        <li>
+                          {% if p.is_free or (current_user.is_authenticated and current_user.is_admin) %}
+                            <a href="{{ url_for('page_view', page_id=p.id) }}">{{ p.title }}</a>
+                            {% if p.is_free %}<span class="badge text-bg-info ms-2">Free</span>{% endif %}
+                          {% else %}
+                            <span class="text-muted">{{ p.title }}</span>
+                            <span class="badge text-bg-secondary ms-2">Locked</span>
+                          {% endif %}
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  {% else %}
+                    <div class="text-muted small">No pages yet.</div>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ol>
+          {% else %}
+            <div class="text-muted">No sections yet.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            {% if current_user.is_authenticated %}
+              {% if is_enrolled %}
+                <button class="btn btn-success" disabled>Already enrolled</button>
+                <!-- Status button scrolls to the progress card -->
+                <a class="btn btn-outline-primary" href="#progress">Check your current learning status</a>
+              {% else %}
+                <form method="post" action="{{ url_for('enroll', course_id=course.id) }}">
+                  <button class="btn btn-success" type="submit">Enroll</button>
+                </form>
+              {% endif %}
+            {% else %}
+              <a class="btn btn-primary" href="{{ url_for('login') }}">Log in to enroll</a>
+              <a class="btn btn-outline-secondary" href="{{ url_for('register') }}">Create an account</a>
+            {% endif %}
+          </div>
+
+          <p class="small text-muted mt-2 mb-0">Payment & enrollment will be enabled next.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

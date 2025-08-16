@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="row">
+    <div class="col-lg-9">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h1 class="h4 mb-3">{{ page.title }}</h1>
+
+          <div class="content-body">
+            {{ html|safe }}
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <div>
+              {% if prev_id %}
+                <a class="btn btn-outline-secondary" href="{{ url_for('page_view', page_id=prev_id) }}">← Previous</a>
+              {% endif %}
+            </div>
+
+            <div class="d-flex gap-2">
+              {% if first_id %}
+                <a class="btn btn-outline-secondary" href="{{ url_for('page_view', page_id=first_id) }}">Back to First Page</a>
+              {% else %}
+                <a class="btn btn-outline-secondary" href="{{ url_for('course_public', course_id=course.id) }}">Back to Course</a>
+              {% endif %}
+              <a class="btn btn-primary" href="{{ url_for('catalog') }}">Back to All Courses</a>
+            </div>
+
+            <div>
+              {% if next_id %}
+                <a class="btn btn-primary" href="{{ url_for('page_view', page_id=next_id) }}">Next →</a>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

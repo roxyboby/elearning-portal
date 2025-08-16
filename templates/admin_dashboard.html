@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h1 class="h4 mb-3">Admin Dashboard</h1>
+          <p class="text-muted mb-4">Welcome, {{ current_user.email }}.</p>
+          
+          <!-- Active Users Info (New Addition) -->
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <div class="card border-primary">
+                <div class="card-body">
+                  <h6 class="card-title text-primary">
+                    <i class="fas fa-users"></i> Active Users
+                  </h6>
+                  <h3 class="mb-0">{{ active_users_count }}</h3>
+                  <small class="text-muted">Currently Online</small>
+                  <div class="mt-2">
+                    <a href="{{ url_for('admin_active_users') }}" class="btn btn-sm btn-outline-primary">
+                      View Details
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card border-warning">
+                <div class="card-body">
+                  <h6 class="card-title text-warning">
+                    <i class="fas fa-clock"></i> Session Timeout
+                  </h6>
+                  <h3 class="mb-0">10 min</h3>
+                  <small class="text-muted">Auto-logout after inactivity</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <a class="btn btn-outline-primary me-2 mb-2" href="{{ url_for('admin_courses') }}">Manage Courses</a>
+          <a class="btn btn-outline-success me-2 mb-2" href="{{ url_for('admin_active_users') }}">Active Users</a>
+          <!-- add more admin actions here later -->
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

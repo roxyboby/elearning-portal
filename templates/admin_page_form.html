@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">{{ 'Edit Page' if page else 'New Page' }}</h1>
+    {% if section %}
+      <a class="btn btn-outline-secondary" href="{{ url_for('admin_course_detail', course_id=section.course_id) }}">← Back</a>
+    {% endif %}
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data" class="vstack gap-3">
+        <div>
+          <label class="form-label">Upload HTML file</label>
+          <input class="form-control" type="file" name="file" accept=".html,.htm">
+          <div class="form-text">Uploading a file will replace the Filename field below.</div>
+        </div>
+
+        <div>
+          <label class="form-label">Title</label>
+          <input class="form-control" name="title" value="{{ page.title if page else '' }}" required>
+        </div>
+        <div>
+          <label class="form-label">Filename (under content/)</label>
+          <input class="form-control" name="filename" value="{{ page.filename if page else '' }}" placeholder="pages/lesson1.html">
+          <div class="form-text">Example: <code>pages/hello.html</code> (resolved under <code>content/</code>)</div>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="is_free" name="is_free" {% if page and page.is_free %}checked{% endif %}>
+          <label class="form-check-label" for="is_free">Free preview</label>
+        </div>
+        <div>
+          <label class="form-label">Position (ordering)</label>
+          <input class="form-control" name="position" type="number" value="{{ page.position if page else 0 }}">
+        </div>
+
+        <div class="d-grid">
+          <button class="btn btn-primary" type="submit">{{ 'Save Changes' if page else 'Create Page' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

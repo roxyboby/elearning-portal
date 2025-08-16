@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Mentor - Module CCP-D0.1: Your AWS Certification Path</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .cert-card {
+            background-color: white;
+            border-left: 4px solid #1d4ed8;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .cert-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .quiz-question {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            background-color: white;
+        }
+        .explanation {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+            border-bottom-right-radius: 0.5rem;
+            border-bottom-left-radius: 0.5rem;
+        }
+        .correct-answer {
+            background-color: #dcfce7; /* Green-100 */
+        }
+        .incorrect-answer {
+            background-color: #fee2e2; /* Red-100 */
+        }
+        .correct-label::after {
+            content: '✔ Correct';
+            color: #166534; /* Green-800 */
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .incorrect-label::after {
+            content: '✖ Incorrect';
+            color: #991b1b; /* Red-800 */
+            font-weight: 600;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-900">Project Gemini: Your Interactive AWS Mentor</h1>
+            <p class="mt-2 text-lg text-gray-600">Your exclusive path to AWS Certification</p>
+        </header>
+
+        <!-- Module Content -->
+        <main>
+            <div class="bg-white shadow-lg rounded-lg p-6 md:p-8 mb-10">
+                <h2 class="text-3xl font-bold text-blue-800 mb-2">Module CCP-D0.1: Your AWS Certification Path</h2>
+                <p class="text-md text-gray-500">Introduction: Understanding the Landscape</p>
+            </div>
+
+            <!-- Analogy Section -->
+            <section id="analogy" class="mb-12">
+                <h3 class="text-2xl font-semibold text-gray-900 mb-4">Analogy: The University Education Path</h3>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <p class="mb-4">Think of the AWS Certification program like attending a university. You don't jump straight into a Ph.D.; you follow a structured path to build your knowledge.</p>
+                    <ul class="list-disc list-inside space-y-4">
+                        <li>
+                            <strong class="text-blue-700">Foundational (High School Diploma):</strong>
+                            <p class="pl-6 text-gray-700">This is the starting point. It proves you understand the basic language, concepts, and value proposition of the AWS Cloud. Everyone should start here. It's the prerequisite for a good conversation.</p>
+                        </li>
+                        <li>
+                            <strong class="text-green-700">Associate (Bachelor's Degree):</strong>
+                            <p class="pl-6 text-gray-700">This is where you first specialize. You demonstrate you have hands-on skills in a specific role: architecting systems, developing applications, or managing operations on AWS.</p>
+                        </li>
+                        <li>
+                            <strong class="text-yellow-600">Professional (Master's Degree):</strong>
+                            <p class="pl-6 text-gray-700">This is an advanced level, showing deep expertise, design skills, and the ability to manage complex, multi-faceted solutions in your chosen specialization.</p>
+                        </li>
+                         <li>
+                            <strong class="text-purple-700">Specialty (Ph.D.):</strong>
+                            <p class="pl-6 text-gray-700">This is for deep-diving into a niche, high-demand area. You prove you're an expert in a specific domain like advanced networking, security, or machine learning.</p>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Core Concepts Section -->
+            <section id="core-concepts" class="mb-12">
+                <h3 class="text-2xl font-semibold text-gray-900 mb-4">Core Concepts: The AWS Certification Levels</h3>
+                <p class="mb-6 text-gray-600">Here are the specific certifications available at each level. Our goal is to conquer them all, starting from the foundation.</p>
+                <div class="space-y-8">
+                    <!-- Foundational -->
+                    <div class="cert-card p-6 rounded-lg shadow-md">
+                        <h4 class="font-bold text-xl mb-2 text-blue-800">Foundational Level</h4>
+                        <p class="mb-3">Validates overall understanding of the AWS Cloud. Recommended 6 months of fundamental AWS Cloud and industry knowledge.</p>
+                        <ul class="list-disc list-inside">
+                            <li><strong>AWS Certified Cloud Practitioner (CLF-C02)</strong></li>
+                        </ul>
+                    </div>
+                    <!-- Associate -->
+                    <div class="cert-card p-6 rounded-lg shadow-md" style="border-color: #15803d;">
+                        <h4 class="font-bold text-xl mb-2 text-green-800">Associate Level</h4>
+                        <p class="mb-3">Role-based certifications validating hands-on experience. Recommended 1 year of experience solving problems and implementing solutions using the AWS Cloud.</p>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li><strong>AWS Certified Solutions Architect – Associate (SAA-C03)</strong></li>
+                            <li><strong>AWS Certified Developer – Associate (DVA-C02)</strong></li>
+                            <li><strong>AWS Certified SysOps Administrator – Associate (SOA-C02)</strong></li>
+                        </ul>
+                    </div>
+                    <!-- Professional -->
+                    <div class="cert-card p-6 rounded-lg shadow-md" style="border-color: #ca8a04;">
+                        <h4 class="font-bold text-xl mb-2 text-yellow-700">Professional Level</h4>
+                        <p class="mb-3">Validates advanced skills and experience in designing, deploying, and operating applications on AWS. Recommended 2 years of comprehensive experience.</p>
+                         <ul class="list-disc list-inside space-y-1">
+                            <li><strong>AWS Certified Solutions Architect – Professional (SAP-C02)</strong></li>
+                            <li><strong>AWS Certified DevOps Engineer – Professional (DOP-C02)</strong></li>
+                        </ul>
+                    </div>
+                    <!-- Specialty -->
+                    <div class="cert-card p-6 rounded-lg shadow-md" style="border-color: #6b21a8;">
+                        <h4 class="font-bold text-xl mb-2 text-purple-800">Specialty Level</h4>
+                        <p class="mb-3">Validates deep technical skills in specific technical areas. Experience requirements vary by specialty.</p>
+                         <ul class="list-disc list-inside space-y-1">
+                            <li><strong>AWS Certified Advanced Networking – Specialty</strong></li>
+                            <li><strong>AWS Certified Data Analytics – Specialty</strong></li>
+                            <li><strong>AWS Certified Database – Specialty</strong></li>
+                            <li><strong>AWS Certified Machine Learning – Specialty</strong></li>
+                            <li><strong>AWS Certified Security – Specialty</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Interactive Quiz Section -->
+            <section id="quiz">
+                <h3 class="text-2xl font-semibold text-gray-900 mb-2">Test Your Knowledge</h3>
+                <p class="text-gray-600 mb-6">Answer all questions, then click the button at the bottom to see your score and the correct answers.</p>
+                
+                <div id="quiz-header" class="sticky top-0 bg-white/80 backdrop-blur-sm z-10 p-4 mb-6 rounded-lg shadow text-center hidden">
+                    <h4 class="text-2xl font-bold text-gray-800">Your Score: <span id="score">--</span>%</h4>
+                </div>
+
+                <form id="quiz-form">
+                    <!-- Question 1 -->
+                    <div class="quiz-question p-6">
+                        <p class="font-semibold mb-4">1. What is the recommended first certification for someone new to the AWS Cloud?</p>
+                        <div class="space-y-2">
+                            <div><label class="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50"><input type="radio" name="q1" value="0" class="mr-2"> AWS Certified Solutions Architect - Associate</label></div>
+                            <div><label class="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50"><input type="radio" name="q1" value="1" class="mr-2"> AWS Certified Cloud Practitioner</label></div>
+                            <div><label class="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50"><input type="radio" name="q1" value="2" class="mr-2"> AWS Certified Developer - Associate</label></div>
+                            <div><label class="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50"><input type="radio" name="q1" value="3" class="mr-2"> AWS Certified Security - Specialty</label></div>
+                        </div>
+                        <div class="explanation"><strong>Explanation:</strong> The AWS Certified Cloud Practitioner is the Foundational level certification, designed to validate a high-level understanding of the AWS cloud, its services, and its value proposition. It is the ideal starting point.</div>
+                    </div>
+
+                    <!-- Question 2 -->
+                    <div class="quiz-question p-6">
+                        <p class="font-semibold mb-4">2. The Associate-level certifications (Solutions Architect, Developer, SysOps Administrator) are primarily what type of certification?</p>
+                        <div class="space-y-2">
+                            <div><label class="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50"><input type="radio" name="q2" value="0" class="mr-2"> Foundational</label></div>
+                            <div><label class="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50"><input type="radio" name="q2" value="1" class="mr-2"> Role-based</label></div>
+                            <div><label class="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50"><input type="radio" name="q2" value="2" class="mr-2"> Specialty</label></div>
+                            <div><label class="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50"><input type="radio" name="q2" value="3" class="mr-2"> General knowledge</label></div>
+                        </div>
+                        <div class="explanation"><strong>Explanation:</strong> The Associate level is where certifications begin to align with specific job roles. They test for the hands-on skills required to perform as a Solutions Architect, Developer, or SysOps Administrator on the AWS platform.</div>
+                    </div>
+                    
+                    <!-- Question 3 -->
+                    <div class="quiz-question p-6">
+                        <p class="font-semibold mb-4">3. A cloud engineer has 3 years of experience designing complex, fault-tolerant systems on AWS and holds the Solutions Architect - Associate certification. Which certification would be the logical next step to validate their advanced skills?</p>
+                        <div class="space-y-2">
+                            <div><label class="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50"><input type="radio" name="q3" value="0" class="mr-2"> AWS Certified Cloud Practitioner</label></div>
+                            <div><label class="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50"><input type="radio" name="q3" value="1" class="mr-2"> AWS Certified Developer - Associate</label></div>
+                            <div><label class="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50"><input type="radio" name="q3" value="2" class="mr-2"> AWS Certified Solutions Architect - Professional</label></div>
+                            <div><label class="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50"><input type="radio" name="q3" value="3" class="mr-2"> AWS Certified Database - Specialty</label></div>
+                        </div>
+                        <div class="explanation"><strong>Explanation:</strong> The Professional level certifications are the direct step up from their Associate counterparts. For someone with a Solutions Architect - Associate, the Solutions Architect - Professional is the next goal to validate advanced architectural skills.</div>
+                    </div>
+
+                    <!-- Question 4 -->
+                    <div class="quiz-question p-6">
+                        <p class="font-semibold mb-4">4. Which certification level requires the deepest technical skills in a specific domain like Machine Learning or Advanced Networking?</p>
+                        <div class="space-y-2">
+                            <div><label class="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50"><input type="radio" name="q4" value="0" class="mr-2"> Foundational</label></div>
+                            <div><label class="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50"><input type="radio" name="q4" value="1" class="mr-2"> Associate</label></div>
+                            <div><label class="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50"><input type="radio" name="q4" value="2" class="mr-2"> Professional</label></div>
+                            <div><label class="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50"><input type="radio" name="q4" value="3" class="mr-2"> Specialty</label></div>
+                        </div>
+                        <div class="explanation"><strong>Explanation:</strong> The Specialty certifications are designed to be deep dives into a single, complex domain. They are analogous to a Ph.D., demonstrating expert-level knowledge in one particular area.</div>
+                    </div>
+
+                    <!-- Question 5 -->
+                    <div class="quiz-question p-6">
+                        <p class="font-semibold mb-4">5. The "AWS Certified DevOps Engineer - Professional" certification is part of which certification level?</p>
+                        <div class="space-y-2">
+                            <div><label class="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50"><input type="radio" name="q5" value="0" class="mr-2"> Foundational</label></div>
+                            <div><label class="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50"><input type="radio" name="q5" value="1" class="mr-2"> Associate</label></div>
+                            <div><label class="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50"><input type="radio" name="q5" value="2" class="mr-2"> Professional</label></div>
+                            <div><label class="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50"><input type="radio" name="q5" value="3" class="mr-2"> Specialty</label></div>
+                        </div>
+                        <div class="explanation"><strong>Explanation:</strong> As its name implies, the "AWS Certified DevOps Engineer - Professional" is a Professional-level certification. It builds upon the concepts from the Developer - Associate and SysOps Administrator - Associate certifications.</div>
+                    </div>
+                    
+                    <button type="button" id="submit-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-colors duration-300 text-lg">
+                        Reveal Answers & Score
+                    </button>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const quizData = [
+            { correctAnswer: 1 }, { correctAnswer: 1 }, { correctAnswer: 2 },
+            { correctAnswer: 3 }, { correctAnswer: 2 }
+        ];
+
+        const submitBtn = document.getElementById('submit-btn');
+        const quizForm = document.getElementById('quiz-form');
+        const scoreEl = document.getElementById('score');
+        const quizHeader = document.getElementById('quiz-header');
+
+        submitBtn.addEventListener('click', () => {
+            let score = 0;
+            const questions = document.querySelectorAll('.quiz-question');
+            
+            questions.forEach((question, index) => {
+                const radios = question.querySelectorAll('input[type="radio"]');
+                const explanation = question.querySelector('.explanation');
+                const selected = question.querySelector('input[type="radio"]:checked');
+                
+                radios.forEach(radio => radio.disabled = true);
+
+                if (explanation) {
+                    explanation.style.display = 'block';
+                }
+
+                const correctAnswerIndex = quizData[index].correctAnswer;
+                const correctLabel = radios[correctAnswerIndex].parentElement;
+
+                correctLabel.classList.add('correct-answer');
+                correctLabel.classList.add('correct-label');
+
+                if (selected) {
+                    const selectedLabel = selected.parentElement;
+                    if (parseInt(selected.value) === correctAnswerIndex) {
+                        score++;
+                    } else {
+                        selectedLabel.classList.add('incorrect-answer');
+                        selectedLabel.classList.add('incorrect-label');
+                    }
+                }
+            });
+
+            const totalQuestions = quizData.length;
+            const percentage = Math.round((score / totalQuestions) * 100);
+            scoreEl.textContent = percentage;
+            quizHeader.classList.remove('hidden');
+            quizHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            submitBtn.textContent = 'Quiz Completed';
+            submitBtn.disabled = true;
+            submitBtn.classList.add('bg-gray-500', 'hover:bg-gray-500', 'cursor-not-allowed');
+        });
+    </script>
+
+</body>
+</html>

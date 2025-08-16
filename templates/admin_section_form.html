@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">
+      {% if section %}Edit Section{% else %}New Section for: {{ course.title }}{% endif %}
+    </h1>
+    {% set cid = (course.id if course else section.course_id) %}
+    <a class="btn btn-outline-secondary" href="{{ url_for('admin_course_detail', course_id=cid) }}">← Back</a>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form method="post" class="vstack gap-3">
+        <div>
+          <label class="form-label">Section Title</label>
+          <input class="form-control" name="title" value="{{ section.title if section else '' }}" required>
+        </div>
+
+        <div>
+          <label class="form-label">Position (ordering)</label>
+          <input class="form-control" name="position" type="number"
+                 value="{% if section %}{{ section.position }}{% elif initial_position is not none %}{{ initial_position }}{% else %}0{% endif %}">
+          <div class="form-text">Lower numbers appear earlier. We normalize to 10,20,30… after save.</div>
+        </div>
+
+        <div class="d-grid">
+          <button class="btn btn-primary" type="submit">
+            {% if section %}Save Changes{% else %}Create Section{% endif %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Login - E-Learning Portal{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-sign-in-alt text-primary" style="font-size: 3rem;"></i>
+                        <h1 class="h3 mt-3 mb-1">Welcome Back</h1>
+                        <p class="text-muted">Sign in to your account</p>
+                    </div>
+                    
+                    <form method="post" class="vstack gap-3">
+                        <div class="form-floating">
+                            <input class="form-control" type="email" name="email" id="email" placeholder="Enter your email" required>
+                            <label for="email">
+                                <i class="fas fa-envelope me-2"></i>Email Address
+                            </label>
+                        </div>
+
+                        <div class="form-floating">
+                            <input class="form-control" type="password" name="password" id="password" placeholder="Enter your password" required>
+                            <label for="password">
+                                <i class="fas fa-lock me-2"></i>Password
+                            </label>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button class="btn btn-primary btn-lg" type="submit">
+                                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-4">
+                        <hr class="my-3">
+                        <p class="text-muted mb-2">Don't have an account?</p>
+                        <a href="{{ url_for('register') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Demo Credentials (Remove in production) -->
+            <div class="card mt-3 border-info">
+                <div class="card-body text-center">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Demo Admin: lobo.roland@gmail.com
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Additional login page styles */
+.form-floating > .form-control {
+    height: 3.5rem;
+    line-height: 1.25;
+}
+
+.form-floating > label {
+    padding: 1rem 0.75rem;
+}
+
+.card {
+    border: none;
+    border-radius: 1rem;
+}
+
+.btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+    
+    .card-body {
+        padding: 2rem 1.5rem !important;
+    }
+    
+    .form-floating > .form-control {
+        height: 3rem;
+    }
+}
+</style>
+{% endblock %}
