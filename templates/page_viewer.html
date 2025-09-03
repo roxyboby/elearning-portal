@@ -13,15 +13,15 @@
           <div class="d-flex justify-content-between align-items-center mt-3">
             <div>
               {% if prev_id %}
-                <a class="btn btn-outline-secondary" href="{{ url_for('page_view', page_id=prev_id) }}">← Previous</a>
+                <a class="btn btn-primary" href="{{ url_for('page_view', page_id=prev_id) }}">← Previous</a>
               {% endif %}
             </div>
 
             <div class="d-flex gap-2">
               {% if first_id %}
-                <a class="btn btn-outline-secondary" href="{{ url_for('page_view', page_id=first_id) }}">Back to First Page</a>
+                <a class="btn btn-primary" href="{{ url_for('page_view', page_id=first_id) }}">Back to First Page</a>
               {% else %}
-                <a class="btn btn-outline-secondary" href="{{ url_for('course_public', course_id=course.id) }}">Back to Course</a>
+                <a class="btn btn-primary" href="{{ url_for('course_public', course_id=course.id) }}">Back to Course</a>
               {% endif %}
               <a class="btn btn-primary" href="{{ url_for('catalog') }}">Back to All Courses</a>
             </div>
