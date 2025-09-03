@@ -43,3 +43,27 @@ class Enrollment(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False, index=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+class UserProgress(db.Model):
+    __tablename__ = 'user_progress'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False, index=True)
+    pages_completed = db.Column(db.Text, nullable=True)  # JSON array of page IDs
+    feedback_triggers_shown = db.Column(db.Text, nullable=True)  # JSON array of trigger types
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+class CourseFeedback(db.Model):
+    __tablename__ = 'course_feedback'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False, index=True)
+    page_id = db.Column(db.Integer, db.ForeignKey('page.id'), nullable=True, index=True)
+    trigger_type = db.Column(db.String(50), nullable=False)  # 'chapter_2', 'mid_course', 'completion', 'manual'
+    content_quality_rating = db.Column(db.Integer, nullable=True)  # 1-5 stars
+    difficulty_rating = db.Column(db.Integer, nullable=True)  # 1-5 stars
+    career_relevance_rating = db.Column(db.Integer, nullable=True)  # 1-5 stars
+    technical_issues_rating = db.Column(db.Integer, nullable=True)  # 1-5 stars
+    comments = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)

@@ -1027,3 +1027,100 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(host='0.0.0.0', port=8000)
+
+
+# -----------------------------------------------------------------------------
+# NEW FEEDBACK SYSTEM FUNCTIONS - Added for milestone tracking
+# -----------------------------------------------------------------------------
+
+import json
+from models import UserProgress, CourseFeedback
+
+def get_or_create_user_progress(user_id, course_id):
+    """Get existing progress or create new progress record for user/course"""
+    progress = UserProgress.query.filter_by(user_id=user_id, course_id=course_id).first()
+    if not progress:
+        progress = UserProgress(
+            user_id=user_id,
+            course_id=course_id,
+            pages_completed='[]',
+            feedback_triggers_shown='[]'
+        )
+        db.session.add(progress)
+        db.session.commit()
+    return progress
+
+
+
+def update_user_progress(user_id, course_id, page_id):
+    """Update user progress when they complete a page"""
+    progress = get_or_create_user_progress(user_id, course_id)
+    
+    # Parse completed pages
+    completed_pages = json.loads(progress.pages_completed or '[]')
+    
+    # Add page if not already completed
+    if page_id not in completed_pages:
+        completed_pages.append(page_id)
+        progress.pages_completed = json.dumps(completed_pages)
+        progress.updated_at = datetime.utcnow()
+        db.session.commit()
+    
+    return len(completed_pages)
+
+
+
+
+
+def should_show_feedback(user_id, course_id, trigger_type):
+    """Check if user should see feedback popup for this milestone"""
+    progress = get_or_create_user_progress(user_id, course_id)
+    
+    # Parse completed triggers
+    completed_triggers = json.loads(progress.feedback_triggers_shown or '[]')
+    
+    # Check if this trigger was already shown
+    if trigger_type in completed_triggers:
+        return False
+    
+    # Parse completed pages
+    completed_pages = json.loads(progress.pages_completed or '[]')
+    pages_count = len(completed_pages)
+    
+    # Check milestone requirements
+    if trigger_type == "chapter_2" and pages_count >= 2:
+        return True
+    elif trigger_type == "mid_course":
+        # Get total pages in course to calculate percentage
+        course = Course.query.get(course_id)
+        sections = Section.query.filter_by(course_id=course_id).all()
+        section_ids = [s.id for s in sections]
+        total_pages = Page.query.filter(Page.section_id.in_(section_ids)).count() if section_ids else 0
+        completion_pct = (pages_count / total_pages * 100) if total_pages > 0 else 0
+        return completion_pct >= 50
+    elif trigger_type == "completion":
+        # Check if course is 100% complete
+        course = Course.query.get(course_id)
+        sections = Section.query.filter_by(course_id=course_id).all()
+        section_ids = [s.id for s in sections]
+        total_pages = Page.query.filter(Page.section_id.in_(section_ids)).count() if section_ids else 0
+        return pages_count >= total_pages
+    
+    return False
+
+
+
+
+def mark_feedback_trigger_completed(user_id, course_id, trigger_type):
+    """Mark a feedback trigger as completed for this user/course"""
+    progress = get_or_create_user_progress(user_id, course_id)
+    
+    # Parse completed triggers
+    completed_triggers = json.loads(progress.feedback_triggers_shown or '[]')
+    
+    # Add trigger if not already marked
+    if trigger_type not in completed_triggers:
+        completed_triggers.append(trigger_type)
+        progress.feedback_triggers_shown = json.dumps(completed_triggers)
+        progress.updated_at = datetime.utcnow()
+        db.session.commit()
