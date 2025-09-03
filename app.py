@@ -1020,6 +1020,108 @@ def delete_hero_image():
 def forbidden(_e):
     return render_template('403.html'), 403
 
+
+# -----------------------------------------------------------------------------
+# API ENDPOINTS FOR FEEDBACK SYSTEM - Added for user progress tracking
+# -----------------------------------------------------------------------------
+# These routes handle AJAX requests from the frontend to track user progress
+# and determine when to trigger feedback popups based on milestones:
+# - chapter_2: After completing 2 pages/chapters
+# - mid_course: After completing 50% of course content
+# - completion: After completing 100% of course content
+# 
+# The system prevents duplicate feedback requests using milestone tracking
+# stored in the user_progress table with JSON arrays for completed pages
+# and feedback triggers already shown to each user per course.
+# -----------------------------------------------------------------------------
+
+@app.route('/api/update_progress', methods=['POST'])
+@login_required
+def update_progress():
+    """API endpoint to update user progress and check feedback triggers"""
+    data = request.get_json()
+    page_id = data.get('page_id')
+    course_id = data.get('course_id')
+    
+    if not page_id or not course_id:
+        return jsonify({'error': 'Missing page_id or course_id'}), 400
+    
+    # Update user progress
+    pages_completed = update_user_progress(current_user.id, course_id, page_id)
+    
+    # Check if feedback should be triggered
+    trigger_type = None
+    if should_show_feedback(current_user.id, course_id, "chapter_2"):
+        trigger_type = "chapter_2"
+    elif should_show_feedback(current_user.id, course_id, "mid_course"):
+        trigger_type = "mid_course"
+    elif should_show_feedback(current_user.id, course_id, "completion"):
+        trigger_type = "completion"
+    
+    return jsonify({
+        'pages_completed': pages_completed,
+        'show_feedback': trigger_type is not None,
+        'trigger_type': trigger_type
+    })
+
+
+
+@app.route('/api/submit_feedback', methods=['POST'])
+@login_required
+def submit_feedback():
+    """API endpoint to submit user feedback for courses"""
+    data = request.get_json()
+    
+    course_id = data.get('course_id')
+    page_id = data.get('page_id')
+    trigger_type = data.get('trigger_type')
+    content_quality = data.get('content_quality_rating')
+    difficulty = data.get('difficulty_rating')
+    career_relevance = data.get('career_relevance_rating')
+    technical_issues = data.get('technical_issues_rating')
+    comments = data.get('comments', '').strip()
+    
+    if not course_id or not trigger_type:
+        return jsonify({'success': False, 'message': 'Missing required fields'}), 400
+    
+    try:
+        # Create feedback record
+        feedback = CourseFeedback(
+            user_id=current_user.id,
+            course_id=course_id,
+            page_id=page_id,
+            trigger_type=trigger_type,
+            content_quality_rating=content_quality,
+            difficulty_rating=difficulty,
+            career_relevance_rating=career_relevance,
+            technical_issues_rating=technical_issues,
+            comments=comments if comments else None
+        )
+        
+        db.session.add(feedback)
+        
+        # Mark this feedback trigger as completed
+        mark_feedback_trigger_completed(current_user.id, course_id, trigger_type)
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Feedback submitted successfully!'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False, 
+            'message': f'Error saving feedback: {str(e)}'
+        }), 500
+
+
+
+
+
+
 # -----------------------------------------------------------------------------
 # 11) Entry point (dev only)
 # -----------------------------------------------------------------------------

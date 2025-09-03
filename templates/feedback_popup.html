@@ -1,0 +1,72 @@
+<!-- Feedback Popup Modal -->
+<div id="feedbackModal" class="modal fade" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="feedbackModalLabel">How's your learning experience?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="feedbackForm">
+                    <!-- Content Quality Rating -->
+                    <div class="mb-3">
+                        <label class="form-label">Content Quality</label>
+                        <div class="star-rating" data-rating="content_quality">
+                            <i class="fas fa-star" data-value="1"></i>
+                            <i class="fas fa-star" data-value="2"></i>
+                            <i class="fas fa-star" data-value="3"></i>
+                            <i class="fas fa-star" data-value="4"></i>
+                            <i class="fas fa-star" data-value="5"></i>
+                        </div>
+                    </div>
+
+                    <!-- Difficulty Level Rating -->
+                    <div class="mb-3">
+                        <label class="form-label">Difficulty Level</label>
+                        <div class="star-rating" data-rating="difficulty">
+                            <i class="fas fa-star" data-value="1"></i>
+                            <i class="fas fa-star" data-value="2"></i>
+                            <i class="fas fa-star" data-value="3"></i>
+                            <i class="fas fa-star" data-value="4"></i>
+                            <i class="fas fa-star" data-value="5"></i>
+                        </div>
+                    </div>
+
+                    <!-- Career Relevance Rating -->
+                    <div class="mb-3">
+                        <label class="form-label">Career Relevance</label>
+                        <div class="star-rating" data-rating="career_relevance">
+                            <i class="fas fa-star" data-value="1"></i>
+                            <i class="fas fa-star" data-value="2"></i>
+                            <i class="fas fa-star" data-value="3"></i>
+                            <i class="fas fa-star" data-value="4"></i>
+                            <i class="fas fa-star" data-value="5"></i>
+                        </div>
+                    </div>
+
+                    <!-- Technical Issues Rating -->
+                    <div class="mb-3">
+                        <label class="form-label">Technical Issues (1=Many Issues, 5=No Issues)</label>
+                        <div class="star-rating" data-rating="technical_issues">
+                            <i class="fas fa-star" data-value="1"></i>
+                            <i class="fas fa-star" data-value="2"></i>
+                            <i class="fas fa-star" data-value="3"></i>
+                            <i class="fas fa-star" data-value="4"></i>
+                            <i class="fas fa-star" data-value="5"></i>
+                        </div>
+                    </div>
+
+                    <!-- Comments -->
+                    <div class="mb-3">
+                        <label class="form-label">Comments (Optional)</label>
+                        <textarea class="form-control" id="feedbackComments" rows="3" placeholder="Share your thoughts about this course..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Skip</button>
+                <button type="button" class="btn btn-primary" id="submitFeedback">Submit Feedback</button>
+            </div>
+        </div>
+    </div>
+</div>
