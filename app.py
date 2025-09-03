@@ -13,6 +13,7 @@ Single-file Flask app with:
 - Minimal, readable structure with comments for each section
 """
 
+
 import os, time
 from functools import wraps
 from flask import Flask, render_template, redirect, url_for, request, flash, abort, session, jsonify
@@ -914,6 +915,67 @@ def admin_course_delete_confirm(course_id: int):
 
 
 
+# Add this right after the admin_course_delete_confirm route (around line 920)
+# and before the "Hero Image Upload Routes" comment
+
+# -----------------------------------------------------------------------------
+# ADMIN FEEDBACK MANAGEMENT ROUTES - View user feedback and analytics
+# -----------------------------------------------------------------------------
+
+@app.route('/admin/feedback')
+@login_required
+@admin_required
+def admin_feedback_dashboard():
+    """Main feedback dashboard showing overview and user list"""
+    # Get all users who have submitted feedback
+    users_with_feedback = (db.session.query(User)
+                          .join(CourseFeedback, User.id == CourseFeedback.user_id)
+                          .distinct()
+                          .all())
+    
+    # Get feedback statistics
+    total_feedback = CourseFeedback.query.count()
+    unique_users = len(users_with_feedback)
+    
+    # Get feedback by trigger type
+    feedback_by_trigger = {}
+    for trigger in ['chapter_2', 'mid_course', 'completion']:
+        count = CourseFeedback.query.filter_by(trigger_type=trigger).count()
+        feedback_by_trigger[trigger] = count
+    
+    return render_template('admin_feedback_dashboard.html',
+                         users_with_feedback=users_with_feedback,
+                         total_feedback=total_feedback,
+                         unique_users=unique_users,
+                         feedback_by_trigger=feedback_by_trigger)
+
+@app.route('/admin/feedback/user/<int:user_id>')
+@login_required
+@admin_required
+def admin_user_feedback(user_id):
+    """View specific user's feedback across all their courses"""
+    user = User.query.get_or_404(user_id)
+    
+    # Get all courses this user has feedback for
+    courses_with_feedback = (db.session.query(Course)
+                            .join(CourseFeedback, Course.id == CourseFeedback.course_id)
+                            .filter(CourseFeedback.user_id == user_id)
+                            .distinct()
+                            .all())
+    
+    # Get all feedback for this user organized by course
+    feedback_by_course = {}
+    for course in courses_with_feedback:
+        feedback_entries = (CourseFeedback.query
+                           .filter_by(user_id=user_id, course_id=course.id)
+                           .order_by(CourseFeedback.created_at.desc())
+                           .all())
+        feedback_by_course[course.id] = feedback_entries
+    
+    return render_template('admin_user_feedback.html',
+                         user=user,
+                         courses_with_feedback=courses_with_feedback,
+                         feedback_by_course=feedback_by_course)
 
 
 
