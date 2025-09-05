@@ -4,6 +4,7 @@
 
 {% block content %}
 <div class="container-fluid">
+
     <div class="row mb-4">
         <div class="col">
             <h1 class="h3">User Feedback Dashboard</h1>
@@ -16,66 +17,30 @@
         </div>
     </div>
 
-    <!-- Feedback Statistics Cards -->
+    <!-- Working Statistics Cards -->
     <div class="row mb-4">
         <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h4 class="mb-0">{{ total_feedback }}</h4>
-                            <small>Total Feedback</small>
-                        </div>
-                        <div class="ms-3">
-                            <i class="fas fa-comments fa-2x opacity-75"></i>
-                        </div>
-                    </div>
-                </div>
+            <div style="background: #007bff; color: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h2 style="margin: 0; color: white; font-size: 2.5rem; font-weight: bold;">{{ total_feedback }}</h2>
+                <p style="margin: 5px 0 0 0; color: white; font-size: 0.9rem;">Total Feedback</p>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h4 class="mb-0">{{ unique_users }}</h4>
-                            <small>Active Users</small>
-                        </div>
-                        <div class="ms-3">
-                            <i class="fas fa-users fa-2x opacity-75"></i>
-                        </div>
-                    </div>
-                </div>
+            <div style="background: #28a745; color: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h2 style="margin: 0; color: white; font-size: 2.5rem; font-weight: bold;">{{ unique_users }}</h2>
+                <p style="margin: 5px 0 0 0; color: white; font-size: 0.9rem;">Active Users</p>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-info text-white">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h4 class="mb-0">{{ feedback_by_trigger.get('chapter_2', 0) }}</h4>
-                            <small>Chapter 2 Feedback</small>
-                        </div>
-                        <div class="ms-3">
-                            <i class="fas fa-bookmark fa-2x opacity-75"></i>
-                        </div>
-                    </div>
-                </div>
+            <div style="background: #17a2b8; color: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h2 style="margin: 0; color: white; font-size: 2.5rem; font-weight: bold;">{{ feedback_by_trigger.get('chapter_2', 0) }}</h2>
+                <p style="margin: 5px 0 0 0; color: white; font-size: 0.9rem;">Chapter 2 Feedback</p>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h4 class="mb-0">{{ feedback_by_trigger.get('mid_course', 0) }}</h4>
-                            <small>Mid-Course Feedback</small>
-                        </div>
-                        <div class="ms-3">
-                            <i class="fas fa-chart-line fa-2x opacity-75"></i>
-                        </div>
-                    </div>
-                </div>
+            <div style="background: #ffc107; color: black; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h2 style="margin: 0; color: black; font-size: 2.5rem; font-weight: bold;">{{ feedback_by_trigger.get('mid_course', 0) }}</h2>
+                <p style="margin: 5px 0 0 0; color: black; font-size: 0.9rem;">Mid-Course Feedback</p>
             </div>
         </div>
     </div>
@@ -107,7 +72,7 @@
                                     <span class="badge bg-primary">{{ user.feedback_count }}</span>
                                 </td>
                                 <td>
-                                    <small class="text-muted">{{ user.latest_feedback_date.strftime('%Y-%m-%d') if user.latest_feedback_date else 'N/A' }}</small>
+                                    <small class="text-muted">{{ user.latest_feedback.strftime('%Y-%m-%d') if user.latest_feedback else 'N/A' }}</small>
                                 </td>
                                 <td>
                                     <a href="{{ url_for('admin_user_feedback', user_id=user.id) }}"
@@ -131,5 +96,3 @@
     </div>
 </div>
 {% endblock %}
-
-
