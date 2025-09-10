@@ -1,0 +1,482 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-1">Job Market Intelligence Dashboard</h1>
+                    <p class="text-muted">Real-time market insights for course development strategy</p>
+                </div>
+                <div>
+                    <button class="btn btn-outline-primary me-2" onclick="refreshMarketData()">
+                        <i class="fas fa-sync-alt me-1"></i>Refresh Data
+                    </button>
+                    <a href="{{ url_for('admin') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Market Overview Cards (Now Clickable) -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-success clickable-card" onclick="showSkillsModal('HIGH_PRIORITY')" style="cursor: pointer;">
+                <div class="card-body text-center">
+                    <h6 class="card-title text-success">
+                        <i class="fas fa-chart-line"></i> High Priority Skills
+                    </h6>
+                    <h2 class="mb-0 text-success">{{ market_summary.high_priority }}</h2>
+                    <small class="text-muted">Immediate Development</small>
+                    <div class="mt-2">
+                        <small class="text-success"><i class="fas fa-mouse-pointer"></i> Click to view details</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning clickable-card" onclick="showSkillsModal('NICHE_OPPORTUNITY')" style="cursor: pointer;">
+                <div class="card-body text-center">
+                    <h6 class="card-title text-warning">
+                        <i class="fas fa-lightbulb"></i> Niche Opportunities
+                    </h6>
+                    <h2 class="mb-0 text-warning">{{ market_summary.niche_opportunities }}</h2>
+                    <small class="text-muted">Specialized Markets</small>
+                    <div class="mt-2">
+                        <small class="text-warning"><i class="fas fa-mouse-pointer"></i> Click to view details</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger clickable-card" onclick="showSkillsModal('LOW_PRIORITY')" style="cursor: pointer;">
+                <div class="card-body text-center">
+                    <h6 class="card-title text-danger">
+                        <i class="fas fa-exclamation-triangle"></i> Low Priority
+                    </h6>
+                    <h2 class="mb-0 text-danger">{{ market_summary.low_priority }}</h2>
+                    <small class="text-muted">Avoid These</small>
+                    <div class="mt-2">
+                        <small class="text-danger"><i class="fas fa-mouse-pointer"></i> Click to view details</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-info clickable-card" onclick="showSkillsModal('ALL')" style="cursor: pointer;">
+                <div class="card-body text-center">
+                    <h6 class="card-title text-info">
+                        <i class="fas fa-database"></i> Total Skills
+                    </h6>
+                    <h2 class="mb-0 text-info">{{ market_summary.total_skills }}</h2>
+                    <small class="text-muted">Tracked</small>
+                    <div class="mt-2">
+                        <small class="text-info"><i class="fas fa-mouse-pointer"></i> Click to view all</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Row -->
+    <div class="row g-4">
+        <!-- Top Skills Column -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-fire me-2"></i>Highest Demand Skills
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for skill in top_skills[:5] %}
+                        <div class="col-12 mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ skill.skill.title() }}</h6>
+                                    <small class="text-muted">{{ skill.source }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-success fs-6">{% if skill.demand == 30 %}{{ skill.demand }}+{% else %}{{ skill.demand }}{% endif %} jobs</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Course Recommendations Column -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-graduation-cap me-2"></i>Course Development Recommendations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for rec in recommendations[:5] %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ rec.skill.title() }}</h6>
+                                <small class="text-muted">{% if rec.job_demand == 30 %}{{ rec.job_demand }}+{% else %}{{ rec.job_demand }}{% endif %} job openings</small>
+                            </div>
+                            <div>
+                                {% if rec.priority == "HIGH_PRIORITY" %}
+                                    <span class="badge bg-success">✅ DEVELOP</span>
+                                {% elif rec.priority == "NICHE_OPPORTUNITY" %}
+                                    <span class="badge bg-warning">⚠️ CONSIDER</span>
+                                {% else %}
+                                    <span class="badge bg-danger">❌ AVOID</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Info -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="alert alert-light border">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h6 class="mb-1">Data Source Information</h6>
+                        <p class="mb-0 text-muted">
+                            Market intelligence powered by Jooble.org API • 
+                            Real job data from Indian tech market • 
+                            Updated: {{ market_summary.last_updated }}
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <small class="text-muted">
+                            API Status: <span class="badge bg-success">Active</span><br>
+                            External URL: <a href="https://api.wiabtech.in" target="_blank">api.wiabtech.in</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Skills Details Modal -->
+<div class="modal fade" id="skillsModal" tabindex="-1" aria-labelledby="skillsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" id="modal-header">
+                <h5 class="modal-title" id="skillsModalLabel">Skills Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <div class="text-center">
+                    <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
+                    <p class="mt-2 text-muted">Loading skills data...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="exportSkillsData()">
+                    <i class="fas fa-download me-1"></i>Export Data
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Current modal data for export
+let currentModalData = null;
+
+// Refresh market data function
+function refreshMarketData() {
+    const refreshBtn = document.querySelector('[onclick="refreshMarketData()"]');
+    const originalText = refreshBtn.innerHTML;
+    
+    // Show loading state
+    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Refreshing...';
+    refreshBtn.disabled = true;
+    
+    fetch('/api/admin/refresh-market-data')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('Market data refreshed successfully!', 'success');
+                window.location.reload();
+            } else {
+                showAlert('Error refreshing data: ' + data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            showAlert('Error connecting to API: ' + error.message, 'danger');
+        })
+        .finally(() => {
+            refreshBtn.innerHTML = originalText;
+            refreshBtn.disabled = false;
+        });
+}
+
+// Show skills modal with filtered data
+function showSkillsModal(priority) {
+    const modal = new bootstrap.Modal(document.getElementById('skillsModal'));
+    const modalHeader = document.getElementById('modal-header');
+    const modalBody = document.getElementById('modal-body');
+    const modalTitle = document.getElementById('skillsModalLabel');
+    
+    // Set up loading state
+    modalBody.innerHTML = `
+        <div class="text-center">
+            <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
+            <p class="mt-2 text-muted">Loading skills data...</p>
+        </div>
+    `;
+    
+    // Configure modal based on priority
+    let apiUrl, title, headerClass;
+    
+    switch(priority) {
+        case 'HIGH_PRIORITY':
+            apiUrl = '/api/admin/skills-by-priority/HIGH_PRIORITY';
+            title = 'High Priority Skills - Immediate Development';
+            headerClass = 'bg-success text-white';
+            break;
+        case 'NICHE_OPPORTUNITY':
+            apiUrl = '/api/admin/skills-by-priority/NICHE_OPPORTUNITY';
+            title = 'Niche Opportunities - Specialized Markets';
+            headerClass = 'bg-warning text-dark';
+            break;
+        case 'LOW_PRIORITY':
+            apiUrl = '/api/admin/skills-by-priority/LOW_PRIORITY';
+            title = 'Low Priority Skills - Avoid These';
+            headerClass = 'bg-danger text-white';
+            break;
+        case 'ALL':
+            apiUrl = '/api/admin/all-skills-data';
+            title = 'All Tracked Skills - Complete Overview';
+            headerClass = 'bg-info text-white';
+            break;
+    }
+    
+    modalTitle.textContent = title;
+    modalHeader.className = `modal-header ${headerClass}`;
+    
+    // Show modal
+    modal.show();
+    
+    // Fetch data
+    fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                modalBody.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error loading data: ${data.error}
+                    </div>
+                `;
+                return;
+            }
+            
+            currentModalData = data;
+            renderSkillsTable(data, priority);
+        })
+        .catch(error => {
+            modalBody.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Failed to load skills data: ${error.message}
+                </div>
+            `;
+        });
+}
+
+// Render skills table in modal
+function renderSkillsTable(data, priority) {
+    const modalBody = document.getElementById('modal-body');
+    const skills = data.skills || [];
+    
+    if (skills.length === 0) {
+        modalBody.innerHTML = `
+            <div class="alert alert-info text-center">
+                <i class="fas fa-info-circle me-2"></i>
+                No skills found in this category.
+            </div>
+        `;
+        return;
+    }
+    
+    // Create summary stats
+    const totalJobs = skills.reduce((sum, skill) => sum + (skill.job_demand || skill.demand || 0), 0);
+    const avgJobs = Math.round(totalJobs / skills.length);
+    
+    let html = `
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h4 class="text-primary mb-0">${skills.length}</h4>
+                    <small class="text-muted">Total Skills</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h4 class="text-success mb-0">${totalJobs}</h4>
+                    <small class="text-muted">Total Jobs</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h4 class="text-info mb-0">${avgJobs}</h4>
+                    <small class="text-muted">Avg per Skill</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Skill</th>
+                        <th>Job Demand</th>
+                        <th>Priority</th>
+                        <th>Recommendation</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    skills.forEach((skill, index) => {
+        const jobCount = skill.job_demand || skill.demand || 0;
+        const skillPriority = skill.priority || 'UNKNOWN';
+        
+        let priorityBadge, recommendation;
+        switch(skillPriority) {
+            case 'HIGH_PRIORITY':
+                priorityBadge = '<span class="badge bg-success">High Priority</span>';
+                recommendation = '<span class="text-success">✅ DEVELOP</span>';
+                break;
+            case 'NICHE_OPPORTUNITY':
+                priorityBadge = '<span class="badge bg-warning">Niche</span>';
+                recommendation = '<span class="text-warning">⚠️ CONSIDER</span>';
+                break;
+            case 'LOW_PRIORITY':
+                priorityBadge = '<span class="badge bg-danger">Low Priority</span>';
+                recommendation = '<span class="text-danger">❌ AVOID</span>';
+                break;
+            default:
+                priorityBadge = '<span class="badge bg-secondary">Unknown</span>';
+                recommendation = '<span class="text-muted">-</span>';
+        }
+        
+        html += `
+            <tr>
+                <td>${index + 1}</td>
+                <td>
+                    <strong>${skill.skill ? skill.skill.charAt(0).toUpperCase() + skill.skill.slice(1) : 'Unknown'}</strong>
+                    <br><small class="text-muted">${skill.source || 'Unknown source'}</small>
+                </td>
+                <td>
+                    <span class="badge bg-primary">${jobCount == 30 ? jobCount + '+' : jobCount} jobs</span>
+                </td>
+                <td>${priorityBadge}</td>
+                <td>${recommendation}</td>
+            </tr>
+        `;
+    });
+    
+    html += `
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    modalBody.innerHTML = html;
+}
+
+// Export skills data
+function exportSkillsData() {
+    if (!currentModalData) {
+        showAlert('No data available to export', 'warning');
+        return;
+    }
+    
+    const skills = currentModalData.skills || [];
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Skill,Job Demand,Priority,Source,Recommendation\n";
+    
+    skills.forEach(skill => {
+        const jobCount = skill.job_demand || skill.demand || 0;
+        const priority = skill.priority || 'UNKNOWN';
+        const source = skill.source || 'Unknown';
+        
+        let recommendation;
+        switch(priority) {
+            case 'HIGH_PRIORITY': recommendation = 'DEVELOP'; break;
+            case 'NICHE_OPPORTUNITY': recommendation = 'CONSIDER'; break;
+            case 'LOW_PRIORITY': recommendation = 'AVOID'; break;
+            default: recommendation = 'UNKNOWN';
+        }
+        
+        const skillName = skill.skill ? skill.skill.replace(/,/g, ';') : 'Unknown';
+        csvContent += `"${skillName}",${jobCount},"${priority}","${source}","${recommendation}"\n`;
+    });
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `market_intelligence_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showAlert('Skills data exported successfully!', 'success');
+}
+
+// Alert helper function
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 400px;';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+// Add hover effects for clickable cards
+document.addEventListener('DOMContentLoaded', function() {
+    const clickableCards = document.querySelectorAll('.clickable-card');
+    
+    clickableCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+            this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+            this.style.transition = 'all 0.2s ease';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = '';
+        });
+    });
+});
+</script>
+{% endblock %}

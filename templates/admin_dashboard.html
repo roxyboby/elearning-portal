@@ -6,10 +6,10 @@
         <div class="card-body">
           <h1 class="h4 mb-3">Admin Dashboard</h1>
           <p class="text-muted mb-4">Welcome, {{ current_user.email }}.</p>
-          
-          <!-- Active Users Info (New Addition) -->
+
+          <!-- Active Users & Market Intelligence Info -->
           <div class="row mb-4">
-            <div class="col-md-6">
+            <div class="col-md-3">
               <div class="card border-primary">
                 <div class="card-body">
                   <h6 class="card-title text-primary">
@@ -25,7 +25,7 @@
                 </div>
               </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
               <div class="card border-warning">
                 <div class="card-body">
                   <h6 class="card-title text-warning">
@@ -36,14 +36,295 @@
                 </div>
               </div>
             </div>
+            <div class="col-md-3">
+              <div class="card border-success" id="market-widget">
+                <div class="card-body">
+                  <h6 class="card-title text-success">
+                    <i class="fas fa-chart-line"></i> High Priority Skills
+                  </h6>
+                  <h3 class="mb-0" id="high-priority-count">
+                    <i class="fas fa-spinner fa-spin"></i>
+                  </h3>
+                  <small class="text-muted">Ready for Development</small>
+                  <div class="mt-2">
+                    <a href="{{ url_for('admin_market_intelligence') }}" class="btn btn-sm btn-outline-success">
+                      View Intelligence
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card border-info" id="total-skills-widget">
+                <div class="card-body">
+                  <h6 class="card-title text-info">
+                    <i class="fas fa-database"></i> Skills Tracked
+                  </h6>
+                  <h3 class="mb-0" id="total-skills-count">
+                    <i class="fas fa-spinner fa-spin"></i>
+                  </h3>
+                  <small class="text-muted">Market Intelligence</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Market Intelligence Summary Card -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <div class="card border-left-success shadow h-100 py-2" style="border-left: 4px solid #1cc88a;">
+                <div class="card-body">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                        Job Market Intelligence Summary
+                      </div>
+                      <div class="row">
+                        <div class="col-md-8">
+                          <div id="market-summary-content">
+                            <p class="mb-2">
+                              <i class="fas fa-spinner fa-spin text-muted"></i> Loading market intelligence data...
+                            </p>
+                          </div>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                          <a href="{{ url_for('admin_market_intelligence') }}" class="btn btn-success btn-sm">
+                            <i class="fas fa-chart-bar me-1"></i>Full Dashboard
+                          </a>
+                          <button class="btn btn-outline-success btn-sm ms-2" onclick="refreshDashboardData()">
+                            <i class="fas fa-sync-alt"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Admin Actions -->
+          <div class="row mb-3">
+            <div class="col-12">
+              <h5>Admin Actions</h5>
+            </div>
           </div>
           
-          <a class="btn btn-outline-primary me-2 mb-2" href="{{ url_for('admin_courses') }}">Manage Courses</a>
-          <a class="btn btn-outline-success me-2 mb-2" href="{{ url_for('admin_active_users') }}">Active Users</a>
-          <a class="btn btn-outline-info me-2 mb-2" href="{{ url_for('admin_feedback_dashboard') }}">User Feedback</a>
-          <!-- add more admin actions here later -->
+          <div class="row g-2">
+            <div class="col-md-4 col-sm-6">
+              <a class="btn btn-outline-primary w-100 mb-2" href="{{ url_for('admin_courses') }}">
+                <i class="fas fa-book me-2"></i>Manage Courses
+              </a>
+            </div>
+            <div class="col-md-4 col-sm-6">
+              <a class="btn btn-outline-success w-100 mb-2" href="{{ url_for('admin_active_users') }}">
+                <i class="fas fa-users me-2"></i>Active Users
+              </a>
+            </div>
+            <div class="col-md-4 col-sm-6">
+              <a class="btn btn-outline-info w-100 mb-2" href="{{ url_for('admin_feedback_dashboard') }}">
+                <i class="fas fa-comments me-2"></i>User Feedback
+              </a>
+            </div>
+            <div class="col-md-4 col-sm-6">
+              <a class="btn btn-outline-warning w-100 mb-2" href="{{ url_for('admin_server_health') }}">
+                <i class="fas fa-heartbeat me-2"></i>Server Health
+              </a>
+            </div>
+            <div class="col-md-4 col-sm-6">
+              <a class="btn btn-outline-secondary w-100 mb-2" href="{{ url_for('admin_market_intelligence') }}">
+                <i class="fas fa-chart-line me-2"></i>Market Intelligence
+              </a>
+            </div>
+            <div class="col-md-4 col-sm-6">
+              <a class="btn btn-outline-dark w-100 mb-2" href="https://api.wiabtech.in" target="_blank">
+                <i class="fas fa-external-link-alt me-2"></i>API Status
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Quick Market Insights Sidebar -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-light">
+          <h6 class="mb-0">
+            <i class="fas fa-fire text-danger me-2"></i>Top Market Demands
+          </h6>
+        </div>
+        <div class="card-body" id="top-skills-sidebar">
+          <div class="text-center text-muted">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p class="mb-0 mt-2">Loading top skills...</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card shadow-sm mt-3">
+        <div class="card-header bg-light">
+          <h6 class="mb-0">
+            <i class="fas fa-exclamation-triangle text-warning me-2"></i>Skills to Avoid
+          </h6>
+        </div>
+        <div class="card-body" id="avoid-skills-sidebar">
+          <div class="text-center text-muted">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p class="mb-0 mt-2">Loading market warnings...</p>
+          </div>
         </div>
       </div>
     </div>
   </div>
+
+<script>
+// Load market intelligence data on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardMarketData();
+});
+
+function loadDashboardMarketData() {
+    fetch('/api/admin/market-summary')
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showMarketError(data.error);
+                return;
+            }
+            
+            // Update main widgets
+            document.getElementById('high-priority-count').textContent = data.high_priority;
+            document.getElementById('total-skills-count').textContent = data.total_skills;
+            
+            // Update market summary
+            updateMarketSummary(data);
+            
+            // Update sidebar skills
+            updateTopSkillsSidebar(data.skills || []);
+            updateAvoidSkillsSidebar(data.skills || []);
+        })
+        .catch(error => {
+            console.error('Error loading market data:', error);
+            showMarketError('Unable to connect to market intelligence API');
+        });
+}
+
+function updateMarketSummary(data) {
+    const summaryContent = document.getElementById('market-summary-content');
+    summaryContent.innerHTML = `
+        <div class="row text-center">
+            <div class="col-3">
+                <h4 class="text-success mb-0">${data.high_priority}</h4>
+                <small>High Priority</small>
+            </div>
+            <div class="col-3">
+                <h4 class="text-warning mb-0">${data.niche_opportunities}</h4>
+                <small>Niche Opps</small>
+            </div>
+            <div class="col-3">
+                <h4 class="text-danger mb-0">${data.low_priority}</h4>
+                <small>Avoid</small>
+            </div>
+            <div class="col-3">
+                <h4 class="text-info mb-0">${data.total_skills}</h4>
+                <small>Total</small>
+            </div>
+        </div>
+        <p class="text-muted mb-0 mt-2">Top Skill: ${data.top_skill} • Updated: ${data.last_updated}</p>
+    `;
+}
+
+function updateTopSkillsSidebar(skills) {
+    const sidebarContainer = document.getElementById('top-skills-sidebar');
+    
+    if (!skills || skills.length === 0) {
+        sidebarContainer.innerHTML = '<p class="text-muted text-center">No skills data available</p>';
+        return;
+    }
+    
+    // Sort skills by demand and take top 5
+    const topSkills = skills.sort((a, b) => b.demand - a.demand).slice(0, 5);
+    
+    let html = '';
+    topSkills.forEach((skill, index) => {
+        html += `
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                    <small class="fw-bold">${skill.skill.charAt(0).toUpperCase() + skill.skill.slice(1)}</small>
+                    <br><small class="text-muted">${skill.source}</small>
+                </div>
+                <span class="badge bg-success">${skill.demand == 30 ? skill.demand + '+' : skill.demand}</span>
+            </div>
+        `;
+    });
+    
+    sidebarContainer.innerHTML = html;
+}
+
+function updateAvoidSkillsSidebar(skills) {
+    const sidebarContainer = document.getElementById('avoid-skills-sidebar');
+    
+    if (!skills || skills.length === 0) {
+        sidebarContainer.innerHTML = '<p class="text-muted text-center">No skills data available</p>';
+        return;
+    }
+    
+    // Find skills with low demand (0-2 jobs)
+    const avoidSkills = skills.filter(skill => skill.demand <= 2).slice(0, 3);
+    
+    if (avoidSkills.length === 0) {
+        sidebarContainer.innerHTML = '<p class="text-success text-center">No skills to avoid - all have good demand!</p>';
+        return;
+    }
+    
+    let html = '';
+    avoidSkills.forEach(skill => {
+        html += `
+            <div class="alert alert-warning py-2 mb-2">
+                <small class="fw-bold">${skill.skill.charAt(0).toUpperCase() + skill.skill.slice(1)}</small>
+                <br><small class="text-muted">${skill.demand} jobs available</small>
+            </div>
+        `;
+    });
+    
+    sidebarContainer.innerHTML = html;
+}
+
+function showMarketError(errorMessage) {
+    // Update widgets with error state
+    document.getElementById('high-priority-count').innerHTML = '<span class="text-muted">N/A</span>';
+    document.getElementById('total-skills-count').innerHTML = '<span class="text-muted">N/A</span>';
+    
+    // Update market summary
+    document.getElementById('market-summary-content').innerHTML = `
+        <div class="alert alert-warning py-2 mb-2">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Unable to load market intelligence: ${errorMessage}
+        </div>
+    `;
+    
+    // Update sidebars
+    document.getElementById('top-skills-sidebar').innerHTML = `
+        <div class="alert alert-warning py-2 mb-0">
+            <small>Market data unavailable</small>
+        </div>
+    `;
+    
+    document.getElementById('avoid-skills-sidebar').innerHTML = `
+        <div class="alert alert-warning py-2 mb-0">
+            <small>Market data unavailable</small>
+        </div>
+    `;
+}
+
+function refreshDashboardData() {
+    // Show loading states
+    document.getElementById('high-priority-count').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    document.getElementById('total-skills-count').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    
+    // Reload data
+    loadDashboardMarketData();
+}
+</script>
 {% endblock %}

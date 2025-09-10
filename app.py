@@ -28,6 +28,13 @@ import uuid
 from PIL import Image
 import json
 import glob
+import psutil
+import os
+from datetime import datetime
+
+
+
+
 
 # -----------------------------------------------------------------------------
 # 0) Load environment variables (.env) early
@@ -74,6 +81,7 @@ os.makedirs(HERO_UPLOAD_FOLDER, exist_ok=True)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_BINDS'] = {'trends': f'sqlite:///{os.path.join(INSTANCE_DIR, "market_intelligence.db")}'}
 
 # Session timeout configuration (10 minutes)
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
@@ -179,6 +187,139 @@ login_manager.init_app(app)
 @login_manager.user_loader
 def load_user(user_id: str):
     return User.query.get(int(user_id))
+
+
+
+#------------------------------------------------------------
+# Server Health Monitoring Functions
+#------------------------------------------------------------
+def get_system_metrics():
+    """Get system resource metrics"""
+    memory = psutil.virtual_memory()
+    memory_data = {
+        'total': round(memory.total / (1024**3), 2),
+        'used': round(memory.used / (1024**3), 2),
+        'available': round(memory.available / (1024**3), 2),
+        'percent': memory.percent
+    }
+    
+    disk = psutil.disk_usage('/')
+    disk_data = {
+        'total': round(disk.total / (1024**3), 2),
+        'used': round(disk.used / (1024**3), 2),
+        'free': round(disk.free / (1024**3), 2),
+        'percent': round((disk.used / disk.total) * 100, 1)
+    }
+    
+    cpu_percent = psutil.cpu_percent(interval=1)
+    
+    # Load average (Linux/Unix systems)
+    try:
+        load_avg = os.getloadavg()
+        load_data = {
+            '1min': round(load_avg[0], 2),
+            '5min': round(load_avg[1], 2),
+            '15min': round(load_avg[2], 2)
+        }
+    except (OSError, AttributeError):
+        load_data = {'1min': 0, '5min': 0, '15min': 0}
+    
+    return {
+        'memory': memory_data,
+        'disk': disk_data,
+        'cpu_percent': cpu_percent,
+        'load_average': load_data,
+        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    }
+
+
+def get_database_health():
+    """Get database health metrics"""
+    try:
+        # Count total records in main tables
+        user_count = User.query.count()
+        course_count = Course.query.count()
+        page_count = Page.query.count()
+        feedback_count = CourseFeedback.query.count()
+        
+        # Get database file size (SQLite)
+        db_path = 'instance/portal.db'  # Adjust path if different
+        if os.path.exists(db_path):
+            db_size = round(os.path.getsize(db_path) / (1024**2), 2)  # MB
+        else:
+            db_size = 0
+        
+        # Test database connectivity with a simple query
+        db_responsive = True
+        try:
+            db.session.execute(db.text('SELECT 1')).fetchone()
+        except:
+            db_responsive = False
+            
+        return {
+            'tables': {
+                'users': user_count,
+                'courses': course_count,
+                'pages': page_count,
+                'feedback': feedback_count
+            },
+            'database_size_mb': db_size,
+            'responsive': db_responsive,
+            'connection_pool_size': 5,  # Default SQLite doesn't use pools, but we can show this
+            'active_connections': 1     # SQLite typically has 1 connection
+        }
+    except Exception as e:
+        return {
+            'tables': {'error': str(e)},
+            'database_size_mb': 0,
+            'responsive': False,
+            'connection_pool_size': 0,
+            'active_connections': 0
+        }
+
+
+
+def get_health_status(metrics):
+    """Determine overall health status based on metrics"""
+    warnings = []
+    critical = []
+    
+    # Memory warnings (adjusted for 8GB Pi)
+    if metrics['memory']['percent'] > 85:
+        critical.append(f"Critical: RAM usage at {metrics['memory']['percent']}%")
+    elif metrics['memory']['percent'] > 70:
+        warnings.append(f"Warning: RAM usage at {metrics['memory']['percent']}%")
+    
+    # Disk warnings (critical for 16GB SD card)
+    if metrics['disk']['percent'] > 90:
+        critical.append(f"Critical: Disk usage at {metrics['disk']['percent']}%")
+    elif metrics['disk']['percent'] > 80:
+        warnings.append(f"Warning: Disk usage at {metrics['disk']['percent']}%")
+    
+    # CPU warnings
+    if metrics['cpu_percent'] > 90:
+        critical.append(f"Critical: CPU usage at {metrics['cpu_percent']}%")
+    elif metrics['cpu_percent'] > 80:
+        warnings.append(f"Warning: CPU usage at {metrics['cpu_percent']}%")
+    
+    # Overall status
+    if critical:
+        status = 'critical'
+    elif warnings:
+        status = 'warning'
+    else:
+        status = 'healthy'
+    
+    return {
+        'status': status,
+        'warnings': warnings,
+        'critical': critical
+    }
+
+
+
+
+
 
 # -----------------------------------------------------------------------------
 # 5) Admin guard decorator
@@ -543,6 +684,29 @@ def admin_active_users():
 def admin_courses():
     courses = Course.query.order_by(Course.id.desc()).all()
     return render_template('admin_courses.html', courses=courses)
+
+
+@app.route('/admin/trends')
+@login_required
+@admin_required
+def admin_trends():
+    """Admin view for market intelligence trends"""
+    from trends_models import TrendData
+    
+    github_trends = TrendData.query.filter_by(source='github').order_by(TrendData.trend_score.desc()).all()
+    
+    total_trends = len(github_trends)
+    top_language = github_trends[0].keyword if github_trends else "No data"
+    
+    return render_template('admin_trends.html', 
+                         trends=github_trends,
+                         total_trends=total_trends,
+                         top_language=top_language)
+
+
+
+
+
 
 @app.route('/admin/courses/new', methods=['GET', 'POST'])
 @login_required
@@ -918,6 +1082,39 @@ def admin_course_delete_confirm(course_id: int):
 # Add this right after the admin_course_delete_confirm route (around line 920)
 # and before the "Hero Image Upload Routes" comment
 
+
+
+# -----------------------------------------------------------------------------
+# SERVER HEALTH MONITORING ROUTES - Admin system monitoring
+# -----------------------------------------------------------------------------
+
+@app.route('/admin/server-health')
+@login_required
+@admin_required
+def admin_server_health():
+    """Server health monitoring dashboard"""
+    try:
+        # Get system metrics
+        system_metrics = get_system_metrics()
+        
+        # Get database health
+        db_health = get_database_health()
+        
+        # Get health status and warnings
+        health_status = get_health_status(system_metrics)
+        
+        return render_template('admin_server_health.html',
+                             system_metrics=system_metrics,
+                             db_health=db_health,
+                             health_status=health_status)
+    
+    except Exception as e:
+        flash(f'Error retrieving server health data: {str(e)}', 'error')
+        return redirect(url_for('admin'))
+
+
+
+
 # -----------------------------------------------------------------------------
 # ADMIN FEEDBACK MANAGEMENT ROUTES - View user feedback and analytics
 # -----------------------------------------------------------------------------
@@ -927,11 +1124,26 @@ def admin_course_delete_confirm(course_id: int):
 @admin_required
 def admin_feedback_dashboard():
     """Main feedback dashboard showing overview and user list"""
-    # Get all users who have submitted feedback
-    users_with_feedback = (db.session.query(User)
-                          .join(CourseFeedback, User.id == CourseFeedback.user_id)
-                          .distinct()
-                          .all())
+    # Get all users who have submitted feedback with their feedback counts
+    users_with_feedback_query = (db.session.query(
+        User.id,
+        User.email,
+        db.func.count(CourseFeedback.id).label('feedback_count'),
+        db.func.max(CourseFeedback.created_at).label('latest_feedback')
+    )
+    .join(CourseFeedback, User.id == CourseFeedback.user_id)
+    .group_by(User.id, User.email)
+    .all())
+    
+    # Convert to list of dictionaries for easier template access
+    users_with_feedback = []
+    for user_data in users_with_feedback_query:
+        users_with_feedback.append({
+            'id': user_data.id,
+            'email': user_data.email,
+            'feedback_count': user_data.feedback_count,
+            'latest_feedback': user_data.latest_feedback
+        })
     
     # Get feedback statistics
     total_feedback = CourseFeedback.query.count()
@@ -948,6 +1160,9 @@ def admin_feedback_dashboard():
                          total_feedback=total_feedback,
                          unique_users=unique_users,
                          feedback_by_trigger=feedback_by_trigger)
+
+
+
 
 @app.route('/admin/feedback/user/<int:user_id>')
 @login_required
@@ -976,6 +1191,231 @@ def admin_user_feedback(user_id):
                          user=user,
                          courses_with_feedback=courses_with_feedback,
                          feedback_by_course=feedback_by_course)
+
+
+
+
+
+# -----------------------------------------------------------------------------
+# MARKET INTELLIGENCE INTEGRATION - Job Market API Client and Routes
+# -----------------------------------------------------------------------------
+
+import requests
+from datetime import datetime, timedelta
+import json
+
+class MarketIntelligenceClient:
+    """Client to interact with the job market intelligence API"""
+    
+    def __init__(self, api_base_url="https://api.wiabtech.in"):
+        self.api_base_url = api_base_url
+    
+    def get_skills_data(self):
+        """Fetch skills data from external API"""
+        try:
+            response = requests.get(f"{self.api_base_url}/api/job-market/skills", timeout=10)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            print(f"Error fetching skills data: {e}")
+            return {"skills": []}
+    
+    def get_course_recommendations(self):
+        """Fetch course recommendations"""
+        try:
+            response = requests.get(f"{self.api_base_url}/api/job-market/course-recommendations", timeout=10)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            print(f"Error fetching recommendations: {e}")
+            return {"course_recommendations": []}
+    
+    def get_market_summary(self):
+        """Generate market summary statistics"""
+        skills_data = self.get_skills_data()
+        recommendations_data = self.get_course_recommendations()
+        
+        if not skills_data.get("skills"):
+            return {
+                "total_skills": 0,
+                "high_priority": 0,
+                "niche_opportunities": 0,
+                "low_priority": 0,
+                "top_skill": "No data available",
+                "last_updated": "N/A"
+            }
+        
+        skills = skills_data["skills"]
+        recommendations = recommendations_data.get("course_recommendations", [])
+        
+        # Categorize by priority
+        high_priority = len([r for r in recommendations if r.get("priority") == "HIGH_PRIORITY"])
+        niche_opportunities = len([r for r in recommendations if r.get("priority") == "NICHE_OPPORTUNITY"])
+        low_priority = len([r for r in recommendations if r.get("priority") == "LOW_PRIORITY"])
+        
+        # Find top skill
+        top_skill = "No data"
+        if skills:
+            top_skill_data = max(skills, key=lambda x: x.get("demand", 0))
+            job_count = top_skill_data.get('demand', 0)
+            job_display = f"{job_count}+" if job_count == 30 else str(job_count)
+            top_skill = f"{top_skill_data.get('skill', 'Unknown')} ({job_display} jobs)"
+
+
+        
+        return {
+            "total_skills": len(skills),
+            "high_priority": high_priority,
+            "niche_opportunities": niche_opportunities,
+            "low_priority": low_priority,
+            "top_skill": top_skill,
+            "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M"),
+            "skills": skills[:10],  # Top 10 for dashboard display
+            "recommendations": recommendations[:5]  # Top 5 recommendations
+        }
+
+# Initialize the market intelligence client
+market_client = MarketIntelligenceClient()
+
+@app.route('/admin/market-intelligence')
+@login_required
+@admin_required
+def admin_market_intelligence():
+    """Enhanced market intelligence dashboard"""
+    try:
+        # Get comprehensive market data
+        market_summary = market_client.get_market_summary()
+        skills_data = market_client.get_skills_data()
+        recommendations_data = market_client.get_course_recommendations()
+        
+        # Process data for charts and widgets
+        skills = skills_data.get("skills", [])
+        recommendations = recommendations_data.get("course_recommendations", [])
+        
+        # Prepare chart data
+        priority_distribution = {
+            "HIGH_PRIORITY": len([r for r in recommendations if r.get("priority") == "HIGH_PRIORITY"]),
+            "NICHE_OPPORTUNITY": len([r for r in recommendations if r.get("priority") == "NICHE_OPPORTUNITY"]),
+            "LOW_PRIORITY": len([r for r in recommendations if r.get("priority") == "LOW_PRIORITY"])
+        }
+        
+        # Top skills for display
+        top_skills = sorted(skills, key=lambda x: x.get("demand", 0), reverse=True)[:10]
+        
+        # Skills to avoid (low demand)
+        avoid_skills = [s for s in skills if s.get("demand", 0) <= 2]
+        
+        return render_template('admin_market_intelligence.html',
+                             market_summary=market_summary,
+                             top_skills=top_skills,
+                             avoid_skills=avoid_skills,
+                             priority_distribution=priority_distribution,
+                             recommendations=recommendations)
+    
+    except Exception as e:
+        flash(f'Error loading market intelligence data: {str(e)}', 'error')
+        return redirect(url_for('admin'))
+
+@app.route('/api/admin/market-summary')
+@login_required
+@admin_required
+def api_admin_market_summary():
+    """API endpoint for real-time market summary data"""
+    try:
+        summary = market_client.get_market_summary()
+        return jsonify(summary)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/admin/refresh-market-data')
+@login_required
+@admin_required
+def api_refresh_market_data():
+    """Refresh market intelligence data"""
+    try:
+        # Force refresh by creating new client instance
+        global market_client
+        market_client = MarketIntelligenceClient()
+        summary = market_client.get_market_summary()
+        return jsonify({
+            "success": True, 
+            "message": "Market data refreshed successfully",
+            "summary": summary
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False, 
+            "message": f"Error refreshing data: {str(e)}"
+        }), 500
+
+
+
+
+
+
+# Add these new routes to your app.py file after the existing market intelligence routes
+
+@app.route('/api/admin/skills-by-priority/<priority>')
+@login_required
+@admin_required
+def api_skills_by_priority(priority):
+    """Get skills filtered by priority level"""
+    try:
+        recommendations_data = market_client.get_course_recommendations()
+        recommendations = recommendations_data.get("course_recommendations", [])
+        
+        # Filter by priority
+        filtered_skills = [r for r in recommendations if r.get("priority") == priority]
+        
+        # Sort by job demand
+        filtered_skills.sort(key=lambda x: x.get("job_demand", 0), reverse=True)
+        
+        return jsonify({
+            "priority": priority,
+            "count": len(filtered_skills),
+            "skills": filtered_skills
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/admin/all-skills-data')
+@login_required
+@admin_required
+def api_all_skills_data():
+    """Get all skills with detailed breakdown"""
+    try:
+        skills_data = market_client.get_skills_data()
+        recommendations_data = market_client.get_course_recommendations()
+        
+        skills = skills_data.get("skills", [])
+        recommendations = recommendations_data.get("course_recommendations", [])
+        
+        # Create comprehensive data structure
+        all_skills_with_priority = []
+        
+        for skill in skills:
+            # Find matching recommendation to get priority
+            matching_rec = next((r for r in recommendations if r.get("skill") == skill.get("skill")), None)
+            priority = matching_rec.get("priority", "UNKNOWN") if matching_rec else "UNKNOWN"
+            
+            all_skills_with_priority.append({
+                "skill": skill.get("skill"),
+                "demand": skill.get("demand", 0),
+                "source": skill.get("source"),
+                "priority": priority
+            })
+        
+        # Sort by demand
+        all_skills_with_priority.sort(key=lambda x: x.get("demand", 0), reverse=True)
+        
+        return jsonify({
+            "total_skills": len(all_skills_with_priority),
+            "skills": all_skills_with_priority
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 
 
 
