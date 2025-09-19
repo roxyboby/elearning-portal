@@ -16,7 +16,7 @@ Single-file Flask app with:
 
 import os, time
 from functools import wraps
-from flask import Flask, render_template, redirect, url_for, request, flash, abort, session, jsonify
+from flask import Flask, render_template, redirect, url_for, request, flash, abort, session, jsonify, send_from_directory
 from flask_login import (
     LoginManager, login_user, logout_user, login_required, current_user
 )
@@ -1618,6 +1618,57 @@ def submit_feedback():
             'success': False, 
             'message': f'Error saving feedback: {str(e)}'
         }), 500
+
+
+
+
+# File Download Routes
+RESOURCES_DIR = os.path.join(os.getcwd(), 'content', 'pages', 'resources')
+
+@app.route('/download/<filename>')
+@login_required
+def download_file(filename):
+    """Serve downloadable resource files"""
+    try:
+        safe_filename = secure_filename(filename)
+        file_path = os.path.join(RESOURCES_DIR, safe_filename)
+        if not os.path.exists(file_path):
+            print(f"File not found: {file_path}")
+            abort(404)
+        
+        print(f"Serving file: {file_path}")
+        return send_from_directory(
+            RESOURCES_DIR, 
+            safe_filename, 
+            as_attachment=True,
+            download_name=safe_filename
+        )
+    except Exception as e:
+        print(f"Download error: {e}")
+        abort(404)
+
+@app.route('/api/resources')
+@login_required
+def list_resources():
+    """List all available resource files"""
+    try:
+        if not os.path.exists(RESOURCES_DIR):
+            return jsonify({'resources': []})
+        
+        files = []
+        for filename in os.listdir(RESOURCES_DIR):
+            file_path = os.path.join(RESOURCES_DIR, filename)
+            if os.path.isfile(file_path):
+                files.append({
+                    'filename': filename,
+                    'download_url': f'/download/{filename}',
+                    'size': os.path.getsize(file_path)
+                })
+        
+        return jsonify({'resources': files})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 
 
