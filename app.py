@@ -1686,27 +1686,55 @@ def submit_feedback():
 # File Download Routes
 RESOURCES_DIR = os.path.join(os.getcwd(), 'content', 'pages', 'resources')
 
+
 @app.route('/download/<filename>')
 @login_required
 def download_file(filename):
-    """Serve downloadable resource files"""
+    """Serve downloadable resource files from organized structure"""
     try:
         safe_filename = secure_filename(filename)
-        file_path = os.path.join(RESOURCES_DIR, safe_filename)
-        if not os.path.exists(file_path):
-            print(f"File not found: {file_path}")
-            abort(404)
         
-        print(f"Serving file: {file_path}")
-        return send_from_directory(
-            RESOURCES_DIR, 
-            safe_filename, 
-            as_attachment=True,
-            download_name=safe_filename
-        )
+        # Search through all course/page directories for the file
+        for course_dir in os.listdir(RESOURCES_DIR):
+            course_path = os.path.join(RESOURCES_DIR, course_dir)
+            if not os.path.isdir(course_path) or not course_dir.startswith('course_'):
+                continue
+                
+            for page_dir in os.listdir(course_path):
+                page_path = os.path.join(course_path, page_dir)
+                if not os.path.isdir(page_path):
+                    continue
+                    
+                file_path = os.path.join(page_path, safe_filename)
+                if os.path.exists(file_path):
+                    print(f"Serving file: {file_path}")
+                    return send_from_directory(
+                        page_path,
+                        safe_filename,
+                        as_attachment=True,
+                        download_name=safe_filename
+                    )
+        
+        # Fallback: check root resources directory for legacy files
+        root_file_path = os.path.join(RESOURCES_DIR, safe_filename)
+        if os.path.exists(root_file_path):
+            print(f"Serving legacy file: {root_file_path}")
+            return send_from_directory(
+                RESOURCES_DIR,
+                safe_filename,
+                as_attachment=True,
+                download_name=safe_filename
+            )
+        
+        print(f"File not found: {safe_filename}")
+        abort(404)
+        
     except Exception as e:
         print(f"Download error: {e}")
         abort(404)
+
+
+
 
 @app.route('/api/resources')
 @login_required
