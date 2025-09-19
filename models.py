@@ -67,3 +67,20 @@ class CourseFeedback(db.Model):
     technical_issues_rating = db.Column(db.Integer, nullable=True)  # 1-5 stars
     comments = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+class PageResource(db.Model):
+    __tablename__ = 'page_resources'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    page_id = db.Column(db.Integer, db.ForeignKey('page.id'), nullable=False)
+    original_filename = db.Column(db.String(255), nullable=False)
+    stored_filename = db.Column(db.String(255), nullable=False)
+    file_size = db.Column(db.Integer)
+    file_type = db.Column(db.String(50))
+    upload_date = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationship
+    page = db.relationship('Page', backref=db.backref('resources', lazy=True, cascade='all, delete-orphan'))
+    
+    def __repr__(self):
+        return f'<PageResource {self.original_filename}>'

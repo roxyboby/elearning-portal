@@ -872,6 +872,39 @@ def admin_pages_new(section_id: int):
             upload.save(abs_path_upload)
             rel_filename = f"pages/{unique}"
 
+# Process resource files if uploaded
+            resource_files = request.files.getlist('resources')
+            auto_fix_links = bool(request.form.get('auto_fix_links'))
+            
+            if resource_files and auto_fix_links:
+                # Read the HTML content to fix resource links
+                with open(abs_path_upload, 'r', encoding='utf-8') as f:
+                    html_content = f.read()
+                
+                # Replace /resources/ with /download/ in the HTML
+                updated_content = html_content.replace('/resources/', '/download/')
+                
+                # Write back the updated content
+                with open(abs_path_upload, 'w', encoding='utf-8') as f:
+                    f.write(updated_content)
+
+
+# Save uploaded resource files
+            for resource_file in resource_files:
+                if resource_file and resource_file.filename:
+                    safe_resource_name = secure_filename(resource_file.filename)
+                    resource_path = os.path.join(RESOURCES_DIR, safe_resource_name)
+                    resource_file.save(resource_path)
+                    
+                    # Record in database (we'll add this after creating the page)
+                    # Will be added after page creation below
+
+
+
+
+
+
+
         if not title:
             flash('Title is required.', 'error')
             return redirect(url_for('admin_pages_new', section_id=section.id))
@@ -901,6 +934,34 @@ def admin_pages_new(section_id: int):
         p = Page(section_id=section.id, title=title, filename=safe_rel, is_free=is_free, position=position)
         db.session.add(p)
         db.session.commit()
+
+
+
+# Save resource file records to database if any were uploaded
+        if 'resource_files' in locals():
+            for resource_file in resource_files:
+                if resource_file and resource_file.filename:
+                    safe_resource_name = secure_filename(resource_file.filename)
+                    file_size = os.path.getsize(os.path.join(RESOURCES_DIR, safe_resource_name))
+                    file_ext = os.path.splitext(safe_resource_name)[1].lower()
+                    
+                    # Create database record
+                    from models import PageResource  # We'll need to add this model
+                    resource_record = PageResource(
+                        page_id=p.id,
+                        original_filename=resource_file.filename,
+                        stored_filename=safe_resource_name,
+                        file_size=file_size,
+                        file_type=file_ext
+                    )
+                    db.session.add(resource_record)
+            
+            db.session.commit()
+
+
+
+
+
 
         flash('Page created.', 'success')
         return redirect(url_for('admin_course_detail', course_id=course.id))
