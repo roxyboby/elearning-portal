@@ -1,327 +1,40 @@
 {% extends "base.html" %}
+
 {% block content %}
-  <div class="row">
-    <div class="col-lg-9">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h1 class="h4 mb-3">{{ page.title }}</h1>
-          <div class="content-body">
-            {{ html|safe }}
-          </div>
-          <div class="d-flex justify-content-between align-items-center mt-3">
-            <div>
-              {% if prev_id %}
-                <a class="btn btn-primary" href="{{ url_for('page_view', page_id=prev_id) }}">← Previous</a>
-              {% endif %}
-            </div>
-            <div class="d-flex gap-2">
-              {% if first_id %}
-                <a class="btn btn-primary" href="{{ url_for('page_view', page_id=first_id) }}">Back to First Page</a>
-              {% else %}
-                <a class="btn btn-primary" href="{{ url_for('course_public', course_id=course.id) }}">Back to Course</a>
-              {% endif %}
-              <a class="btn btn-primary" href="{{ url_for('catalog') }}">Back to All Courses</a>
-            </div>
-            <div>
-              {% if next_id %}
-                <a class="btn btn-primary" href="{{ url_for('page_view', page_id=next_id) }}">Next →</a>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-<!-- Feedback Popup Modal -->
-<div id="feedbackModal" class="modal fade" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="feedbackModalLabel">
-                    <i class="fas fa-star me-2"></i>How's your learning experience?
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div id="feedbackTriggerMessage" class="alert alert-info mb-3"></div>
-                
-                <form id="feedbackForm">
-                    <!-- Content Quality Rating -->
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Content Quality</label>
-                        <div class="star-rating" data-rating="content_quality">
-                            <i class="fas fa-star" data-value="1"></i>
-                            <i class="fas fa-star" data-value="2"></i>
-                            <i class="fas fa-star" data-value="3"></i>
-                            <i class="fas fa-star" data-value="4"></i>
-                            <i class="fas fa-star" data-value="5"></i>
-                        </div>
-                        <small class="text-muted">Rate the quality of the course content</small>
-                    </div>
-
-                    <!-- Difficulty Level Rating -->
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Difficulty Level</label>
-                        <div class="star-rating" data-rating="difficulty">
-                            <i class="fas fa-star" data-value="1"></i>
-                            <i class="fas fa-star" data-value="2"></i>
-                            <i class="fas fa-star" data-value="3"></i>
-                            <i class="fas fa-star" data-value="4"></i>
-                            <i class="fas fa-star" data-value="5"></i>
-                        </div>
-                        <small class="text-muted">1 = Too Easy, 3 = Just Right, 5 = Too Hard</small>
-                    </div>
-
-                    <!-- Career Relevance Rating -->
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Career Relevance</label>
-                        <div class="star-rating" data-rating="career_relevance">
-                            <i class="fas fa-star" data-value="1"></i>
-                            <i class="fas fa-star" data-value="2"></i>
-                            <i class="fas fa-star" data-value="3"></i>
-                            <i class="fas fa-star" data-value="4"></i>
-                            <i class="fas fa-star" data-value="5"></i>
-                        </div>
-                        <small class="text-muted">How relevant is this content for your career goals?</small>
-                    </div>
-
-                    <!-- Technical Issues Rating -->
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Technical Issues</label>
-                        <div class="star-rating" data-rating="technical_issues">
-                            <i class="fas fa-star" data-value="1"></i>
-                            <i class="fas fa-star" data-value="2"></i>
-                            <i class="fas fa-star" data-value="3"></i>
-                            <i class="fas fa-star" data-value="4"></i>
-                            <i class="fas fa-star" data-value="5"></i>
-                        </div>
-                        <small class="text-muted">1 = Many Issues, 5 = No Technical Problems</small>
-                    </div>
-
-                    <!-- Comments -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Additional Comments <span class="text-muted">(Optional)</span></label>
-                        <textarea class="form-control" id="feedbackComments" rows="3" placeholder="Share your thoughts, suggestions, or report any issues..."></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-2"></i>Skip for Now
-                </button>
-                <button type="button" class="btn btn-primary" id="submitFeedback">
-                    <i class="fas fa-paper-plane me-2"></i>Submit Feedback
-                </button>
-            </div>
-        </div>
-    </div>
+<div style="padding: 0; margin: 0;">
+    {{ html|safe }}
 </div>
 
-<style>
-/* Star Rating Styles */
-.star-rating {
-    display: flex;
-    gap: 5px;
-    margin-top: 5px;
-}
+<!-- Simple navigation -->
+<div style="text-align: center; padding: 20px; background-color: #f4f7f6;">
+    {% if prev_id %}
+        <a href="{{ url_for('page_view', page_id=prev_id) }}" style="display: inline-block; margin: 5px; padding: 10px 15px; background-color: #0056b3 !important; color: white !important; text-decoration: none; border-radius: 5px; min-height: 40px; width: 120px; text-align: center;">← Previous</a>
+    {% endif %}
+    
+    {% if first_id %}
+        <a href="{{ url_for('page_view', page_id=first_id) }}" style="display: inline-block; margin: 5px; padding: 10px 15px; background-color: #6c757d !important; color: white !important; text-decoration: none; border-radius: 5px; min-height: 40px; width: 120px; text-align: center;">First Page</a>
+    {% else %}
+        <a href="{{ url_for('course_public', course_id=course.id) }}" style="display: inline-block; margin: 5px; padding: 10px 15px; background-color: #6c757d !important; color: white !important; text-decoration: none; border-radius: 5px; min-height: 40px; width: 120px; text-align: center;">Course Home</a>
+    {% endif %}
+    
+    <a href="{{ url_for('catalog') }}" style="display: inline-block; margin: 5px; padding: 10px 15px; background-color: #6c757d !important; color: white !important; text-decoration: none; border-radius: 5px; min-height: 40px; width: 120px; text-align: center;">All Courses</a>
+    
+    {% if next_id %}
+        <a href="{{ url_for('page_view', page_id=next_id) }}" style="display: inline-block; margin: 5px; padding: 10px 15px; background-color: #0056b3 !important; color: white !important; text-decoration: none; border-radius: 5px; min-height: 40px; width: 120px; text-align: center;">Next →</a>
+    {% endif %}
+</div>
 
-.star-rating i {
-    font-size: 1.5rem;
-    color: #ddd;
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-
-.star-rating i:hover,
-.star-rating i.active {
-    color: #ffc107;
-}
-
-.star-rating i.hover-preview {
-    color: #ffca2c;
-}
-
-.feedback-trigger-info {
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-    color: white;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-}
-</style>
-
-<!-- Enhanced JavaScript for Feedback System -->
+<!-- Basic progress tracking -->
 <script>
-let currentTriggerType = null;
-
-// Track page completion and check for feedback triggers
 document.addEventListener('DOMContentLoaded', function() {
-    // Mark this page as completed
     const pageId = {{ page.id }};
     const courseId = {{ course.id }};
     
-    // Send AJAX request to update progress
     fetch('/api/update_progress', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            page_id: pageId,
-            course_id: courseId
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.show_feedback) {
-            showFeedbackPopup(data.trigger_type);
-        }
-    })
-    .catch(error => console.error('Progress tracking error:', error));
-
-    // Initialize star rating functionality
-    initializeStarRatings();
-    
-    // Initialize feedback submission
-    initializeFeedbackSubmission();
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page_id: pageId, course_id: courseId })
+    }).catch(error => console.log('Progress tracking unavailable'));
 });
-
-function showFeedbackPopup(triggerType) {
-    currentTriggerType = triggerType;
-    
-    // Set trigger-specific message
-    const messageEl = document.getElementById('feedbackTriggerMessage');
-    let message = '';
-    
-    if (triggerType === 'chapter_2') {
-        message = '<i class="fas fa-rocket me-2"></i>Great progress! You\'ve completed your first 2 chapters. Help us improve your learning experience!';
-    } else if (triggerType === 'mid_course') {
-        message = '<i class="fas fa-medal me-2"></i>Halfway there! You\'ve completed 50% of the course. How are we doing so far?';
-    } else if (triggerType === 'completion') {
-        message = '<i class="fas fa-trophy me-2"></i>Congratulations! You\'ve completed the entire course. Share your experience!';
-    }
-    
-    messageEl.innerHTML = message;
-    
-    // Show the modal
-    const modal = new bootstrap.Modal(document.getElementById('feedbackModal'));
-    modal.show();
-}
-
-function initializeStarRatings() {
-    // Handle star rating interactions
-    document.querySelectorAll('.star-rating').forEach(rating => {
-        const stars = rating.querySelectorAll('i');
-        
-        stars.forEach(star => {
-            // Hover effect
-            star.addEventListener('mouseenter', function() {
-                const value = parseInt(this.dataset.value);
-                stars.forEach((s, index) => {
-                    if (index < value) {
-                        s.classList.add('hover-preview');
-                    } else {
-                        s.classList.remove('hover-preview');
-                    }
-                });
-            });
-            
-            // Click to select
-            star.addEventListener('click', function() {
-                const value = parseInt(this.dataset.value);
-                rating.dataset.selectedValue = value;
-                
-                stars.forEach((s, index) => {
-                    if (index < value) {
-                        s.classList.add('active');
-                    } else {
-                        s.classList.remove('active');
-                    }
-                });
-            });
-        });
-        
-        // Remove hover effects when mouse leaves
-        rating.addEventListener('mouseleave', function() {
-            stars.forEach(s => s.classList.remove('hover-preview'));
-        });
-    });
-}
-
-function initializeFeedbackSubmission() {
-    document.getElementById('submitFeedback').addEventListener('click', function() {
-        // Collect ratings
-        const ratings = {};
-        document.querySelectorAll('.star-rating').forEach(rating => {
-            const category = rating.dataset.rating;
-            const value = rating.dataset.selectedValue;
-            ratings[category] = value ? parseInt(value) : null;
-        });
-        
-        // Get comments
-        const comments = document.getElementById('feedbackComments').value.trim();
-        
-        // Prepare feedback data
-        const feedbackData = {
-            course_id: {{ course.id }},
-            page_id: {{ page.id }},
-            trigger_type: currentTriggerType,
-            content_quality_rating: ratings.content_quality,
-            difficulty_rating: ratings.difficulty,
-            career_relevance_rating: ratings.career_relevance,
-            technical_issues_rating: ratings.technical_issues,
-            comments: comments
-        };
-        
-        // Submit feedback
-        fetch('/api/submit_feedback', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(feedbackData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Close modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById('feedbackModal'));
-                modal.hide();
-                
-                // Show thank you message
-                showThankYouMessage();
-            } else {
-                alert('Error submitting feedback: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Feedback submission error:', error);
-            alert('Error submitting feedback. Please try again.');
-        });
-    });
-}
-
-function showThankYouMessage() {
-    // Create a temporary success message
-    const alertDiv = document.createElement('div');
-    alertDiv.className = 'alert alert-success alert-dismissible fade show';
-    alertDiv.innerHTML = `
-        <i class="fas fa-heart me-2"></i>
-        <strong>Thank you!</strong> Your feedback helps us improve the learning experience.
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    // Insert at top of content
-    const cardBody = document.querySelector('.card-body');
-    cardBody.insertBefore(alertDiv, cardBody.firstChild);
-    
-    // Auto-remove after 5 seconds
-    setTimeout(() => {
-        if (alertDiv.parentNode) {
-            alertDiv.remove();
-        }
-    }, 5000);
-}
 </script>
 {% endblock %}

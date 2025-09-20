@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}File Cleanup Tool - Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-broom me-2"></i>File Cleanup Tool</h2>
+            <p class="text-muted">Remove orphaned HTML files that are no longer linked to any course pages.</p>
+        </div>
+    </div>
+    
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <h5><i class="fas fa-info-circle me-2"></i>Cleanup Summary:</h5>
+                <ul class="mb-0">
+                    <li><strong>Total HTML files:</strong> {{ result.total_files }}</li>
+                    <li><strong>Active files (linked to pages):</strong> {{ result.active_files }}</li>
+                    <li><strong>Orphaned files (can be deleted):</strong> {{ result.orphaned_files|length }}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    {% if result.orphaned_files %}
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="alert alert-warning">
+                    <h5><i class="fas fa-exclamation-triangle me-2"></i>Files to be deleted:</h5>
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        <ul>
+                            {% for file in result.orphaned_files %}
+                            <li><code>{{ file }}</code></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                
+                <form method="POST" onsubmit="return confirm('Are you sure you want to delete {{ result.orphaned_files|length }} files? This action cannot be undone.');">
+                    <button type="submit" class="btn btn-danger btn-lg">
+                        <i class="fas fa-trash me-2"></i>Delete {{ result.orphaned_files|length }} Orphaned Files
+                    </button>
+                </form>
+            </div>
+        </div>
+    {% else %}
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>No orphaned files found. Your system is clean!
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <a href="{{ url_for('admin') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Admin Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

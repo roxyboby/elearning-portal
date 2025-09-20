@@ -31,7 +31,7 @@ import glob
 import psutil
 import os
 from datetime import datetime
-
+from sqlalchemy import text
 
 
 
@@ -1478,7 +1478,58 @@ def api_all_skills_data():
 
 
 
+def cleanup_orphaned_files():
+    """Clean up HTML files that don't belong to any existing course pages"""
+    
+    # Get all existing page filenames from database
+    pages = db.session.execute(text("SELECT filename FROM page WHERE filename IS NOT NULL")).fetchall()
+    active_filenames = set()
+    
+    for row in pages:
+        filename = row[0]
+        if filename:
+            # Remove 'pages/' prefix if it exists
+            if filename.startswith('pages/'):
+                filename = filename[6:]
+            active_filenames.add(filename)
+    
+    # Get all HTML files in content/pages directory
+    html_files = glob.glob('content/pages/*.html')
+    
+    orphaned_files = []
+    for file_path in html_files:
+        filename = os.path.basename(file_path)
+        if filename not in active_filenames and not filename.endswith('.backup'):
+            orphaned_files.append(file_path)
+    
+    return {
+        'total_files': len(html_files),
+        'active_files': len(active_filenames),
+        'orphaned_files': orphaned_files
+    }
 
+@app.route('/admin/cleanup-files', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_cleanup_files():
+    if request.method == 'POST':
+        # Actually delete the files
+        result = cleanup_orphaned_files()
+        deleted_count = 0
+        
+        for file_path in result['orphaned_files']:
+            try:
+                os.remove(file_path)
+                deleted_count += 1
+            except Exception as e:
+                flash(f'Error deleting {file_path}: {str(e)}', 'error')
+        
+        flash(f'Successfully deleted {deleted_count} orphaned files.', 'success')
+        return redirect(url_for('admin'))
+    
+    # Show cleanup preview
+    result = cleanup_orphaned_files()
+    return render_template('admin_cleanup_files.html', result=result)
 
 
 
