@@ -24,17 +24,236 @@
     {% endif %}
 </div>
 
-<!-- Basic progress tracking -->
+<!-- Enhanced progress tracking with feedback -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Page viewer loaded - checking for feedback triggers');
+    
     const pageId = {{ page.id }};
     const courseId = {{ course.id }};
     
-    fetch('/api/update_progress', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ page_id: pageId, course_id: courseId })
-    }).catch(error => console.log('Progress tracking unavailable'));
+    console.log('Current page ID:', pageId);
+    console.log('Current course ID:', courseId);
+    
+    if (pageId && courseId) {
+        updateProgress(pageId, courseId);
+    }
 });
+
+async function updateProgress(pageId, courseId) {
+    console.log('Updating progress for page:', pageId, 'course:', courseId);
+    
+    try {
+        const response = await fetch('/api/update_progress', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                page_id: pageId,
+                course_id: courseId
+            })
+        });
+        
+        if (!response.ok) {
+            console.error('Progress update failed:', response.status);
+            return;
+        }
+        
+        const data = await response.json();
+        console.log('Progress update response:', data);
+        
+        // Check if we should show feedback popup
+        if (data.show_feedback && data.trigger_type && !sessionStorage.getItem('feedback_shown_' + courseId + '_' + data.trigger_type)) {
+            sessionStorage.setItem('feedback_shown_' + courseId + '_' + data.trigger_type, 'true');
+            console.log('Showing feedback popup for trigger:', data.trigger_type);
+            showFeedbackPopup(courseId, data.trigger_type);
+
+        }
+        
+    } catch (error) {
+        console.error('Error updating progress:', error);
+    }
+}
+
+function showFeedbackPopup(courseId, triggerType) {
+    console.log('Creating feedback popup for course:', courseId, 'trigger:', triggerType);
+    
+    const modalHTML = `
+        <div class="modal fade" id="feedbackModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-star me-2"></i>
+                            ${getFeedbackTitle(triggerType)}
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-4">${getFeedbackMessage(triggerType)}</p>
+                        
+                        <form id="feedbackForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Content Quality</label>
+                                    <div class="star-rating" data-category="content_quality">
+                                        ${generateStars()}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Difficulty Level</label>
+                                    <div class="star-rating" data-category="difficulty">
+                                        ${generateStars()}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Career Relevance</label>
+                                    <div class="star-rating" data-category="career_relevance">
+                                        ${generateStars()}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Technical Issues</label>
+                                    <div class="star-rating" data-category="technical_issues">
+                                        ${generateStars()}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="comments" class="form-label fw-bold">Additional Comments</label>
+                                <textarea class="form-control" id="comments" rows="3" placeholder="Share your thoughts..."></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Skip</button>
+                        <button type="button" class="btn btn-primary" onclick="submitFeedback('${courseId}', '${triggerType}')">
+                            Submit Feedback
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const existingModal = document.getElementById('feedbackModal');
+    if (existingModal) existingModal.remove();
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    initializeStarRatings();
+    
+    const modal = new bootstrap.Modal(document.getElementById('feedbackModal'));
+    modal.show();
+}
+
+function getFeedbackTitle(triggerType) {
+    const titles = {
+        'chapter_2': 'Early Course Feedback',
+        'mid_course': 'Mid-Course Check-in', 
+        'completion': 'Course Completion Feedback'
+    };
+    return titles[triggerType] || 'Course Feedback';
+}
+
+function getFeedbackMessage(triggerType) {
+    const messages = {
+        'chapter_2': 'You\'ve completed the first two chapters! How\'s your learning experience so far?',
+        'mid_course': 'You\'re halfway through the course! We\'d love to hear how it\'s going.',
+        'completion': 'Congratulations on completing the course! Please share your experience.'
+    };
+    return messages[triggerType] || 'We\'d love to hear your feedback!';
+}
+
+function generateStars() {
+    let stars = '';
+    for (let i = 1; i <= 5; i++) {
+        stars += `<i class="fas fa-star star" data-rating="${i}" style="color: #e4e5e9; cursor: pointer; margin-right: 5px;"></i>`;
+    }
+    return stars;
+}
+
+function initializeStarRatings() {
+    const starRatings = document.querySelectorAll('.star-rating');
+    
+    starRatings.forEach(rating => {
+        const stars = rating.querySelectorAll('.star');
+        
+        stars.forEach((star, index) => {
+            star.addEventListener('click', () => selectRating(rating, index + 1));
+            star.addEventListener('mouseenter', () => highlightStars(stars, index));
+            star.addEventListener('mouseleave', () => resetStars(rating));
+        });
+    });
+}
+
+function highlightStars(stars, hoverIndex) {
+    stars.forEach((star, index) => {
+        star.style.color = index <= hoverIndex ? '#ffc107' : '#e4e5e9';
+    });
+}
+
+function resetStars(rating) {
+    const selectedRating = rating.getAttribute('data-selected') || 0;
+    const stars = rating.querySelectorAll('.star');
+    
+    stars.forEach((star, index) => {
+        star.style.color = index < selectedRating ? '#ffc107' : '#e4e5e9';
+    });
+}
+
+function selectRating(rating, stars) {
+    rating.setAttribute('data-selected', stars);
+    resetStars(rating);
+}
+
+async function submitFeedback(courseId, triggerType) {
+    const ratings = {};
+    const starRatings = document.querySelectorAll('.star-rating');
+    
+    starRatings.forEach(rating => {
+        const category = rating.getAttribute('data-category');
+        const selectedRating = rating.getAttribute('data-selected') || 0;
+        ratings[category + '_rating'] = parseInt(selectedRating);
+    });
+    
+    const comments = document.getElementById('comments').value;
+    
+    try {
+        const response = await fetch('/api/submit_feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                course_id: courseId,
+                trigger_type: triggerType,
+                content_quality_rating: ratings.content_quality_rating || 0,
+                difficulty_rating: ratings.difficulty_rating || 0,
+                career_relevance_rating: ratings.career_relevance_rating || 0,
+                technical_issues_rating: ratings.technical_issues_rating || 0,
+                comments: comments
+            })
+        });
+        
+        if (response.ok) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('feedbackModal'));
+            modal.hide();
+            
+            setTimeout(() => {
+                alert('Thank you for your feedback! It helps us improve the course.');
+            }, 500);
+        } else {
+            alert('Failed to submit feedback. Please try again.');
+        }
+        
+    } catch (error) {
+        console.error('Error submitting feedback:', error);
+        alert('Error submitting feedback. Please try again.');
+    }
+}
 </script>
+
+
+
+
 {% endblock %}

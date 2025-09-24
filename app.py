@@ -523,6 +523,45 @@ def page_view(page_id: int):
 def healthz():
     return "OK", 200
 
+
+@app.route('/sitemap.xml')
+def sitemap():
+       """Generate XML sitemap for SEO"""
+       from flask import Response
+       
+       # Create simple sitemap content
+       sitemap_xml = '''<?xml version="1.0" encoding="UTF-8"?>
+   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+       <url>
+           <loc>https://elearning.wiabtech.in/</loc>
+           <lastmod>{}</lastmod>
+           <changefreq>daily</changefreq>
+           <priority>1.0</priority>
+       </url>
+       <url>
+           <loc>https://elearning.wiabtech.in/courses</loc>
+           <lastmod>{}</lastmod>
+           <changefreq>weekly</changefreq>
+           <priority>0.9</priority>
+       </url>
+       <url>
+           <loc>https://elearning.wiabtech.in/about</loc>
+           <lastmod>{}</lastmod>
+           <changefreq>monthly</changefreq>
+           <priority>0.8</priority>
+       </url>
+   </urlset>'''.format(
+           datetime.now().strftime('%Y-%m-%d'),
+           datetime.now().strftime('%Y-%m-%d'),
+           datetime.now().strftime('%Y-%m-%d')
+       )
+       
+       return Response(sitemap_xml, mimetype='application/xml')
+
+
+
+
+
 # -----------------------------------------------------------------------------
 # 7) Auth (Register / Login / Logout)
 # -----------------------------------------------------------------------------
@@ -1663,20 +1702,48 @@ def update_progress():
     # Update user progress
     pages_completed = update_user_progress(current_user.id, course_id, page_id)
     
-    # Check if feedback should be triggered
+    # Simple page-based triggers (no percentage calculations)
     trigger_type = None
-    if should_show_feedback(current_user.id, course_id, "chapter_2"):
-        trigger_type = "chapter_2"
-    elif should_show_feedback(current_user.id, course_id, "mid_course"):
-        trigger_type = "mid_course"
-    elif should_show_feedback(current_user.id, course_id, "completion"):
+    
+    # Check triggers in order, only show ones not already triggered
+    if pages_completed >= 15 and should_show_feedback(current_user.id, course_id, "completion"):
         trigger_type = "completion"
+    elif pages_completed >= 8 and should_show_feedback(current_user.id, course_id, "mid_course"):
+        trigger_type = "mid_course"
+    elif pages_completed >= 3 and should_show_feedback(current_user.id, course_id, "chapter_2"):
+        trigger_type = "chapter_2"
+    
+    # Mark trigger as shown
+    if trigger_type:
+        mark_feedback_trigger_completed(current_user.id, course_id, trigger_type)
     
     return jsonify({
         'pages_completed': pages_completed,
         'show_feedback': trigger_type is not None,
         'trigger_type': trigger_type
     })
+
+
+
+def get_course_page_count(course_id):
+    """Get total number of pages in a course"""
+    from sqlalchemy import text
+    try:
+        result = db.session.execute(
+            text("""
+                SELECT COUNT(p.id) 
+                FROM page p 
+                JOIN section s ON p.section_id = s.id 
+                WHERE s.course_id = :course_id
+            """),
+            {"course_id": course_id}
+        ).scalar()
+        return result or 1
+    except Exception as e:
+        print(f"Error counting pages: {e}")
+        return 10
+
+
 
 
 
@@ -1919,3 +1986,6 @@ def mark_feedback_trigger_completed(user_id, course_id, trigger_type):
         progress.feedback_triggers_shown = json.dumps(completed_triggers)
         progress.updated_at = datetime.utcnow()
         db.session.commit()
+
+
+
