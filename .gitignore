@@ -1,7 +1,100 @@
+# Database files
 instance/*.db
+instance/*.db-journal
+*.db
+*.db.bak*
+
+# Python
 *.pyc
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Environment variables
 .env
+.env.local
+
+# Logs
 *.log
-static/test-files/
+logs/
+
+# Backup files
+*.bak
+*.backup
+*.backup.*
+*.bak.*
+*.save
+*.save.*
+*.tmp
+*.old
+*.pre_fixer
+*.working
+app.py.bad*
+models.backup.py
+app.backup.py
+*.pub
+
+# Test and restore files
+test_*.py
+*_test.sh
+restore_test_*/
+backups/
+
+# Reports and data
 reports/
+static/test-files/
+job_market_intelligence/
+
+# Journey and trend files
+*_journey.txt
+*_trends.py
+trend_report.html
+trends_models.py
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Email test files
+email_*.py
+email_*.html
+send_email.py
+
+# Other scripts and utilities
+cleanup_*.py
+collect_*.py
+fix_*.py
+git_status_output.txt
+
+# Additional files to ignore
+app.working.py
+models1.py
+filename
+login.html
+market_intelligence_monitor.py
+safe_shutdown_new.sh
+weekly_report_generator.py
+templates/page_viewer.html.complex_backup
+templates/page_viewer_old.html
+templates/admin_server_health.html
+templates/admin_trends.html
+
+# Weird terminal escape sequences
+"\033[D\033[C"
+"\033[D\033[C.pub"
+
+# Course content and uploads
+content/
+static/uploads/
