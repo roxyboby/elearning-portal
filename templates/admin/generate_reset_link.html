@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>Generate Password Reset Link
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Admin Tool:</strong> Use this tool to generate secure password reset links for users.
+                        The link will be valid for 24 hours.
+                    </div>
+                    
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <form method="POST">
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-envelope me-2"></i>User Email Address
+                            </label>
+                            <input type="email" 
+                                   class="form-control form-control-lg" 
+                                   name="email" 
+                                   placeholder="Enter user's email address"
+                                   required
+                                   autofocus>
+                            <small class="form-text text-muted">
+                                Enter the email of the user who needs to reset their password
+                            </small>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning btn-lg text-dark">
+                                <i class="fas fa-link me-2"></i>Generate Reset Link
+                            </button>
+                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card mt-4 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>How It Works</h5>
+                </div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li class="mb-2">Enter the email address of the user who needs to reset their password</li>
+                        <li class="mb-2">A secure reset link will be generated (valid for 24 hours)</li>
+                        <li class="mb-2">Share the link with the user via email or secure messaging</li>
+                        <li class="mb-2">User clicks the link and sets a new password</li>
+                        <li>The link can only be used once and expires after 24 hours</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

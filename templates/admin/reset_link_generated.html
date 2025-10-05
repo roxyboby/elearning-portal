@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-lg">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-check-circle me-2"></i>Password Reset Link Generated
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-success">
+                        <i class="fas fa-check me-2"></i>
+                        Reset link successfully generated for <strong>{{ email }}</strong>
+                    </div>
+                    
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-link me-2"></i>Reset Link
+                            </h5>
+                            <div class="input-group mb-3">
+                                <input type="text" 
+                                       class="form-control font-monospace" 
+                                       id="resetLink" 
+                                       value="{{ reset_url }}" 
+                                       readonly>
+                                <button class="btn btn-primary" 
+                                        type="button" 
+                                        onclick="copyToClipboard()">
+                                    <i class="fas fa-copy me-2"></i>Copy Link
+                                </button>
+                            </div>
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                This link will expire in {{ expires_hours }} hours
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Important Security Notes:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Share this link securely with the user (preferably via encrypted email or secure messaging)</li>
+                            <li>The link can only be used once</li>
+                            <li>The link expires in {{ expires_hours }} hours</li>
+                            <li>Do not share this link publicly or in unsecured channels</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary btn-lg" onclick="copyToClipboard()">
+                            <i class="fas fa-copy me-2"></i>Copy Link to Clipboard
+                        </button>
+                        <a href="{{ url_for('generate_admin_reset_link') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-plus me-2"></i>Generate Another Link
+                        </a>
+                        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard() {
+    const resetLink = document.getElementById('resetLink');
+    resetLink.select();
+    resetLink.setSelectionRange(0, 99999);
+    
+    navigator.clipboard.writeText(resetLink.value).then(function() {
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check me-2"></i>Copied!';
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-success');
+        
+        setTimeout(function() {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-primary');
+        }, 2000);
+    }).catch(function(err) {
+        alert('Failed to copy: ' + err);
+    });
+}
+</script>
+{% endblock %}

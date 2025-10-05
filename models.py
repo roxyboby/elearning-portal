@@ -12,6 +12,11 @@ class User(UserMixin, db.Model):
     password_hash = db.Column('password', db.String(255), nullable=False)
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
 
+
+    def check_password(self, password):
+        """Check if provided password matches stored hash"""
+        from werkzeug.security import check_password_hash
+        return check_password_hash(self.password_hash, password)
 class Course(db.Model):
     __tablename__ = 'course'
     id = db.Column(db.Integer, primary_key=True)
@@ -84,3 +89,19 @@ class PageResource(db.Model):
     
     def __repr__(self):
         return f'<PageResource {self.original_filename}>'
+
+# Password Reset Token Model
+class PasswordResetToken(db.Model):
+    __tablename__ = 'password_reset_token'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    token = db.Column(db.String(100), unique=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    used = db.Column(db.Boolean, default=False)
+    
+    # Relationship
+    user = db.relationship('User', backref='reset_tokens')
+    
+    def __repr__(self):
+        return f'<PasswordResetToken {self.token[:10]}...>'

@@ -25,6 +25,7 @@ from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 import uuid
+import secrets
 from PIL import Image
 import json
 import glob
@@ -161,7 +162,7 @@ def before_request():
 # -----------------------------------------------------------------------------
 # 3) Database + Models (import after app creation)
 # -----------------------------------------------------------------------------
-from models import db, User, Course, Section, Page, Enrollment  # noqa: E402
+from models import db, User, Course, Section, Page, Enrollment, PasswordResetToken  # noqa: E402
 db.init_app(app)
 
 # One-time migration: ensure 'cover_image' column exists on 'course'
@@ -641,6 +642,122 @@ def login():
         return redirect(url_for('admin'))
     else:
         return redirect(url_for('my_courses'))
+
+# ==================== PASSWORD RESET ROUTES ====================
+
+@app.route('/request-password-reset')
+def request_password_reset():
+    """User-facing page to request password reset"""
+    return render_template('request_password_reset.html')
+
+@app.route('/admin/generate-reset-link', methods=['GET', 'POST'])
+@login_required
+def generate_admin_reset_link():
+    """Admin-only route to generate password reset link"""
+    if not current_user.is_admin:
+        flash('Access denied. Admin privileges required.', 'danger')
+        return redirect(url_for('home'))
+    
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip().lower()
+        
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            flash('User not found.', 'danger')
+            return render_template('admin/generate_reset_link.html')
+        
+        token = secrets.token_urlsafe(32)
+        expires_at = datetime.utcnow() + timedelta(hours=24)
+        
+        reset_token = PasswordResetToken(
+            user_id=user.id,
+            token=token,
+            expires_at=expires_at
+        )
+        db.session.add(reset_token)
+        db.session.commit()
+        
+        reset_url = url_for('reset_password', token=token, _external=True)
+        
+        return render_template('admin/reset_link_generated.html', 
+                             reset_url=reset_url, 
+                             email=email,
+                             expires_hours=24)
+    
+    return render_template('admin/generate_reset_link.html')
+
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    """Public route for password reset using token"""
+    reset_token = PasswordResetToken.query.filter_by(
+        token=token,
+        used=False
+    ).first()
+    
+    if not reset_token:
+        flash('Invalid or expired reset link.', 'danger')
+        return redirect(url_for('login'))
+    
+    if reset_token.expires_at < datetime.utcnow():
+        flash('This reset link has expired. Please request a new one.', 'danger')
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        new_password = request.form.get('new_password', '')
+        confirm_password = request.form.get('confirm_password', '')
+        
+        if not new_password or len(new_password) < 6:
+            flash('Password must be at least 6 characters long.', 'danger')
+            return render_template('reset_password.html', token=token, email=reset_token.user.email)
+        
+        if new_password != confirm_password:
+            flash('Passwords do not match.', 'danger')
+            return render_template('reset_password.html', token=token, email=reset_token.user.email)
+        
+        user = reset_token.user
+        user.password_hash = generate_password_hash(new_password)
+        reset_token.used = True
+        
+        db.session.commit()
+        
+        flash('Your password has been successfully reset! You can now login with your new password.', 'success')
+        return redirect(url_for('login'))
+    
+    return render_template('reset_password.html', 
+                         token=token, 
+                         email=reset_token.user.email)
+
+@app.route('/profile/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    """Route for logged-in users to change their own password"""
+    if request.method == 'POST':
+        current_password = request.form.get('current_password', '')
+        new_password = request.form.get('new_password', '')
+        confirm_password = request.form.get('confirm_password', '')
+        
+        if not current_user.check_password(current_password):
+            flash('Current password is incorrect.', 'danger')
+            return render_template('change_password.html')
+        
+        if not new_password or len(new_password) < 6:
+            flash('New password must be at least 6 characters long.', 'danger')
+            return render_template('change_password.html')
+        
+        if new_password != confirm_password:
+            flash('New passwords do not match.', 'danger')
+            return render_template('change_password.html')
+        
+        current_user.password_hash = generate_password_hash(new_password)
+        db.session.commit()
+        
+        flash('Your password has been successfully changed!', 'success')
+        return redirect(url_for('admin' if current_user.is_admin else 'my_courses'))
+    
+    return render_template('change_password.html')
+
+# ==================== END PASSWORD RESET ROUTES ====================
+
 
 
 
